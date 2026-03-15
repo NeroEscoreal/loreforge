@@ -849,26 +849,32 @@ async function loadSceneImage(prompt, turnNum) {
   // Use turnNum + hash of prompt as seed so every scene is unique
   const promptHash = prompt.split('').reduce((a,c) => a + c.charCodeAt(0), 0);
   const seed = (turnNum * 31337 + promptHash) % 99999;
-  const encoded = encodeURIComponent(prompt + `, turn ${turnNum}, cinematic, atmospheric, dramatic lighting, highly detailed, painterly, unique scene`);
+  const encoded = encodeURIComponent(prompt + `, cinematic, atmospheric, dramatic lighting, highly detailed, painterly`);
   const url = `https://image.pollinations.ai/prompt/${encoded}?model=flux-schnell&width=1280&height=560&seed=${seed}&nologo=true&nofeed=true`;
-
-  const timer = setTimeout(() => { img.src = ''; drawCanvasScene(prompt); }, 14000);
 
   const img = document.createElement('img');
   img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 0.6s ease;';
-  img.crossOrigin = 'anonymous';
-  img.onload = () => {
-    clearTimeout(timer);
-    if (img.naturalWidth > 0) {
-      imgLoading.style.display = 'none';
-      svgWrap.innerHTML = '';
-      svgWrap.appendChild(img);
-      requestAnimationFrame(() => { img.style.opacity = '1'; });
-    } else {
-      drawCanvasScene(prompt);
-    }
+  // NO crossOrigin — that's what breaks it on mobile (CORS preflight rejection)
+
+  let done = false;
+  const fallback = () => {
+    if (done) return;
+    done = true;
+    drawCanvasScene(prompt);
   };
-  img.onerror = () => { clearTimeout(timer); drawCanvasScene(prompt); };
+
+  const timer = setTimeout(fallback, 18000);
+
+  img.onload = () => {
+    if (done) return;
+    done = true;
+    clearTimeout(timer);
+    imgLoading.style.display = 'none';
+    svgWrap.innerHTML = '';
+    svgWrap.appendChild(img);
+    requestAnimationFrame(() => { img.style.opacity = '1'; });
+  };
+  img.onerror = () => { clearTimeout(timer); fallback(); };
   img.src = url;
 }
 // ─────────────────────────────────────────────────────────────────────────────
