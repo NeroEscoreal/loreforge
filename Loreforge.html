@@ -1,0 +1,891 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c9a84c">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Loreforge</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --surface2: #181820;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.13);
+    --gold: #c9a84c;
+    --gold-dim: #7a5f28;
+    --gold-faint: rgba(201,168,76,0.06);
+    --text: #e8e2d5;
+    --text-dim: #8a8070;
+    --text-muted: #4a4540;
+    --radius: 8px;
+    --font-display: 'Palatino Linotype', 'Book Antiqua', Palatino, 'Times New Roman', serif;
+    --font-body: Georgia, 'Times New Roman', serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 17px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background-image:
+      radial-gradient(ellipse 80% 40% at 50% 0%, rgba(100,70,20,0.12) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 60px, rgba(255,255,255,0.012) 60px, rgba(255,255,255,0.012) 61px);
+  }
+  header {
+    width: 100%;
+    max-width: 700px;
+    padding: 1.75rem 1.25rem 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .logo {
+    font-family: var(--font-display);
+    font-size: 15px;
+    letter-spacing: 0.22em;
+    color: var(--gold);
+    text-transform: uppercase;
+    font-weight: normal;
+  }
+  .turn-badge {
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    text-transform: uppercase;
+  }
+  main {
+    width: 100%;
+    max-width: 700px;
+    padding: 0 1.25rem 5rem;
+    flex: 1;
+  }
+  #intro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 2.5rem;
+    text-align: center;
+  }
+  .ornament {
+    font-size: 22px;
+    color: var(--gold-dim);
+    letter-spacing: 0.6em;
+    margin-bottom: 1.25rem;
+    opacity: 0.7;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(24px, 6vw, 36px);
+    font-weight: normal;
+    letter-spacing: 0.06em;
+    color: var(--text);
+    line-height: 1.25;
+    margin-bottom: 0.75rem;
+  }
+  .subtitle {
+    font-size: 15px;
+    color: var(--text-dim);
+    font-style: italic;
+    line-height: 1.7;
+    max-width: 360px;
+    margin-bottom: 2.25rem;
+  }
+  .genre-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    width: 100%;
+    max-width: 440px;
+    margin-bottom: 0;
+  }
+  .genre-btn {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 13px 10px;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    text-align: center;
+    font-weight: normal;
+  }
+  .genre-btn:hover { border-color: var(--gold-dim); color: var(--text-dim); background: var(--surface2); }
+  .genre-btn.selected { border-color: var(--gold); color: var(--gold); background: var(--gold-faint); }
+  .genre-btn.custom-btn { grid-column: 1 / -1; border-color: rgba(201,168,76,0.2); color: var(--gold-dim); }
+  .genre-btn.custom-btn.selected { border-color: var(--gold); color: var(--gold); }
+  #custom-wrap {
+    display: none;
+    width: 100%;
+    max-width: 440px;
+    margin-top: 8px;
+  }
+  #custom-input {
+    width: 100%;
+    background: var(--surface);
+    border: 0.5px solid rgba(201,168,76,0.25);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-style: italic;
+    outline: none;
+    resize: none;
+    min-height: 72px;
+    line-height: 1.6;
+    transition: border-color 0.2s;
+  }
+  #custom-input:focus { border-color: var(--gold-dim); }
+  #custom-input::placeholder { color: var(--text-muted); }
+  .field-hint {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-top: 5px;
+    text-align: left;
+  }
+  .api-section {
+    width: 100%;
+    max-width: 440px;
+    margin-top: 1.25rem;
+    margin-bottom: 1.25rem;
+  }
+  .field-label {
+    font-size: 10px;
+    letter-spacing: 0.14em;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    font-family: var(--font-display);
+    margin-bottom: 7px;
+    display: block;
+  }
+  .text-input {
+    width: 100%;
+    background: var(--surface);
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .text-input:focus { border-color: var(--gold-dim); }
+  .text-input::placeholder { color: var(--text-muted); font-style: italic; }
+  .begin-btn {
+    background: transparent;
+    border: 1px solid var(--gold);
+    border-radius: var(--radius);
+    padding: 13px 44px;
+    color: var(--gold);
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+    font-weight: normal;
+  }
+  .begin-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: rgba(201,168,76,0.08);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .begin-btn:hover::before { transform: scaleX(1); }
+  .begin-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  #intro-loading {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    width: 100%;
+    max-width: 440px;
+  }
+  .gate-bar-wrap {
+    width: 100%;
+    height: 1.5px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .gate-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+    animation: gateProgress 9s ease-out forwards;
+  }
+  @keyframes gateProgress {
+    0%{width:0%} 20%{width:30%} 50%{width:60%} 80%{width:82%} 100%{width:93%}
+  }
+  .gate-text {
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    animation: fpulse 1.4s ease-in-out infinite;
+  }
+  .gate-runes {
+    font-size: 16px;
+    letter-spacing: 0.4em;
+    color: var(--gold-dim);
+    animation: runesAnim 2.5s ease-in-out infinite;
+  }
+  @keyframes fpulse { 0%,100%{opacity:0.35} 50%{opacity:1} }
+  @keyframes runesAnim { 0%,100%{opacity:0.25;letter-spacing:0.2em} 50%{opacity:0.65;letter-spacing:0.6em} }
+  .err {
+    display: none;
+    background: rgba(160,48,48,0.12);
+    border: 0.5px solid rgba(160,48,48,0.3);
+    border-radius: var(--radius);
+    padding: 9px 13px;
+    font-size: 13px;
+    color: #e07070;
+    margin-top: 10px;
+    line-height: 1.5;
+    max-width: 440px;
+    text-align: left;
+  }
+  #game { display: none; }
+  .divider {
+    height: 0.5px;
+    background: linear-gradient(90deg, transparent, var(--border2), transparent);
+    margin: 1.25rem 0;
+  }
+  #scene-image-wrap {
+    display: none;
+    width: 100%;
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 10px;
+    position: relative;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    aspect-ratio: 16/7;
+  }
+  #image-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--text-muted);
+    letter-spacing: 0.08em;
+  }
+  #narrative {
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.5rem 1.75rem;
+    min-height: 120px;
+    line-height: 1.85;
+    font-size: 17px;
+    color: var(--text);
+    margin-bottom: 8px;
+    transition: opacity 0.3s;
+    position: relative;
+  }
+  #narrative::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    opacity: 0.5;
+  }
+  #world-state {
+    background: var(--surface2);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.9rem 1.2rem;
+    font-size: 13.5px;
+    color: var(--text-dim);
+    line-height: 1.65;
+    margin-bottom: 8px;
+    display: none;
+  }
+  .ws-label {
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 7px;
+    display: block;
+  }
+  #visual-strip {
+    border-left: 1.5px solid var(--gold-dim);
+    padding: 6px 12px;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--text-muted);
+    line-height: 1.55;
+    margin-bottom: 1.25rem;
+    display: none;
+  }
+  #loading {
+    display: none;
+    text-align: center;
+    padding: 0.75rem 0 0;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  @keyframes pulse { 0%,100%{opacity:0.3} 50%{opacity:1} }
+  #loading span { animation: pulse 1.6s ease-in-out infinite; }
+  .section-label {
+    font-family: var(--font-display);
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+    display: block;
+  }
+  .actions-list {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 8px;
+  }
+  .action-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .action-num {
+    font-family: var(--font-display);
+    font-size: 11px;
+    color: var(--text-muted);
+    min-width: 14px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .ai-action-btn {
+    flex: 1;
+    background: var(--surface);
+    border: 0.5px solid var(--border);
+    border-radius: var(--radius);
+    padding: 9px 13px;
+    color: var(--text-dim);
+    font-family: var(--font-body);
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.18s;
+    line-height: 1.4;
+    font-style: italic;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .ai-action-btn:hover { border-color: var(--gold-dim); color: var(--text); background: var(--surface2); }
+  .ai-action-btn.selected { border-color: var(--gold); color: var(--gold); background: var(--gold-faint); font-style: normal; }
+  .ai-action-btn .ai-tag {
+    font-size: 9px;
+    letter-spacing: 0.1em;
+    color: var(--text-muted);
+    font-family: var(--font-display);
+    text-transform: uppercase;
+    margin-right: 6px;
+    font-style: normal;
+  }
+  .ai-action-btn.loading-action { color: var(--text-muted); font-style: italic; }
+  .action-field {
+    flex: 1;
+    background: var(--surface);
+    border: 0.5px solid rgba(201,168,76,0.2);
+    border-radius: var(--radius);
+    padding: 9px 13px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 15px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .action-field:focus { border-color: var(--gold-dim); }
+  .action-field::placeholder { color: var(--gold-dim); font-style: italic; }
+  .actions-note {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-style: italic;
+    margin-bottom: 10px;
+  }
+  .submit-btn {
+    width: 100%;
+    margin-top: 4px;
+    background: transparent;
+    border: 0.5px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 11px;
+    color: var(--text-dim);
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: normal;
+  }
+  .submit-btn:hover { border-color: var(--gold-dim); color: var(--gold); }
+  .submit-btn:disabled { opacity: 0.35; cursor: not-allowed; }
+  .submit-btn:active { transform: scale(0.99); }
+  #err-game {
+    display: none;
+    background: rgba(160,48,48,0.12);
+    border: 0.5px solid rgba(160,48,48,0.3);
+    border-radius: var(--radius);
+    padding: 9px 13px;
+    font-size: 13px;
+    color: #e07070;
+    margin-top: 8px;
+  }
+  @media (max-width: 480px) {
+    header { padding: 1.25rem 1rem 0.25rem; }
+    main { padding: 0 1rem 5rem; }
+    #narrative { padding: 1.25rem; }
+    h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <span class="logo">Loreforge</span>
+  <span class="turn-badge" id="turn-label"></span>
+</header>
+
+<main>
+  <div id="intro">
+    <div class="ornament">✦ ✦ ✦</div>
+    <h1>Choose Your World</h1>
+    <p class="subtitle">An immersive turn-based story engine. Each turn the AI suggests actions — or write your own.</p>
+    <div class="genre-grid">
+      <button class="genre-btn selected" data-genre="dark fantasy">Dark Fantasy</button>
+      <button class="genre-btn" data-genre="sci-fi space opera">Space Opera</button>
+      <button class="genre-btn" data-genre="post-apocalyptic">Post-Apocalyptic</button>
+      <button class="genre-btn" data-genre="noir mystery">Noir Mystery</button>
+      <button class="genre-btn" data-genre="epic medieval">Epic Medieval</button>
+      <button class="genre-btn" data-genre="cosmic horror">Cosmic Horror</button>
+      <button class="genre-btn custom-btn" data-genre="custom">✦ Custom World</button>
+    </div>
+    <div id="custom-wrap">
+      <textarea id="custom-input" placeholder="Describe your world... e.g. 'A steampunk empire where time is currency and rebels steal minutes to survive.'" maxlength="400"></textarea>
+      <p class="field-hint">Describe the setting, tone, rules — anything you can imagine.</p>
+    </div>
+    <div class="api-section">
+      <label class="field-label" for="api-key">Groq API Key (free — get one at console.groq.com)</label>
+      <input type="password" class="text-input" id="api-key" placeholder="gsk_..." autocomplete="off" />
+    </div>
+    <button class="begin-btn" id="begin-btn">Begin the Tale</button>
+    <div class="err" id="err-intro"></div>
+    <div id="intro-loading">
+      <div class="gate-runes">✦ ✦ ✦</div>
+      <div class="gate-bar-wrap"><div class="gate-bar" id="gate-bar"></div></div>
+      <div class="gate-text" id="gate-text">The gates stir...</div>
+    </div>
+  </div>
+
+  <div id="game">
+    <div class="divider" style="margin-top:0.75rem"></div>
+    <div id="scene-image-wrap">
+      <div id="image-loading">Painting the scene...</div>
+      <div id="scene-svg-wrap" style="width:100%;height:100%;display:block;"></div>
+    </div>
+    <div id="narrative"><span style="color:var(--text-muted);font-style:italic;font-size:15px">The world stirs...</span></div>
+    <div id="world-state">
+      <span class="ws-label">World State</span>
+      <span id="ws-text"></span>
+    </div>
+    <div id="visual-strip"></div>
+    <div id="loading"><span>The world responds to your actions...</span></div>
+    <div class="divider"></div>
+    <span class="section-label">Choose an Action or Write Your Own</span>
+    <p class="actions-note">Click a suggested action to select it — or type your own in action 5.</p>
+    <div class="actions-list">
+      <div class="action-row">
+        <span class="action-num">1</span>
+        <button class="ai-action-btn loading-action" id="btn-a1"><span class="ai-tag">AI</span><span class="ai-text">Waiting for suggestions...</span></button>
+      </div>
+      <div class="action-row">
+        <span class="action-num">2</span>
+        <button class="ai-action-btn loading-action" id="btn-a2"><span class="ai-tag">AI</span><span class="ai-text">Waiting for suggestions...</span></button>
+      </div>
+      <div class="action-row">
+        <span class="action-num">3</span>
+        <button class="ai-action-btn loading-action" id="btn-a3"><span class="ai-tag">AI</span><span class="ai-text">Waiting for suggestions...</span></button>
+      </div>
+      <div class="action-row">
+        <span class="action-num">4</span>
+        <button class="ai-action-btn loading-action" id="btn-a4"><span class="ai-tag">AI</span><span class="ai-text">Waiting for suggestions...</span></button>
+      </div>
+      <div class="action-row">
+        <span class="action-num">5</span>
+        <input class="action-field" id="a5" placeholder="Your custom action..." />
+      </div>
+    </div>
+    <button class="submit-btn" id="submit-btn">Act Upon the World</button>
+    <div id="err-game"></div>
+  </div>
+</main>
+
+<script>
+const STORY_SYSTEM = `You are an Interactive Story Game Engine AI. Create a fully immersive, turn-based world.
+Rules:
+1. Each turn the player gives up to 5 actions (5th is their free custom action).
+2. Narrate outcomes, consequences, NPC reactions, environmental changes, emotional responses. Write at least 5-7 rich cinematic sentences.
+3. Keep narration cinematic, immersive, consistent with the genre.
+4. Generate a short vivid visual prompt for image generation representing the scene (describe lighting, mood, key visual elements).
+5. Maintain world state and update after each turn.
+6. Never control player characters. Only describe world responses.
+7. After the narrative, always suggest exactly 4 possible next actions the player could take, fitting the current story situation.
+Respond ONLY with valid JSON, no markdown fences, no extra text:
+{"narrative":"<cinematic narration>","world_changes":"<NPC/environment/status updates>","visual_prompt":"<vivid image gen prompt, mention art style: dark oil painting, cinematic, etc>","suggested_actions":["<action 1>","<action 2>","<action 3>","<action 4>"]}`;
+
+let apiKey = '';
+let genre = 'dark fantasy';
+let genreLabel = 'dark fantasy';
+let history = [];
+let turn = 0;
+
+document.querySelectorAll('.genre-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.genre-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    genre = btn.dataset.genre;
+    const wrap = document.getElementById('custom-wrap');
+    wrap.style.display = genre === 'custom' ? 'block' : 'none';
+    if (genre === 'custom') document.getElementById('custom-input').focus();
+  });
+});
+
+[1,2,3,4].forEach(i => {
+  document.getElementById(`btn-a${i}`).addEventListener('click', function() {
+    const wasSelected = this.classList.contains('selected');
+    [1,2,3,4].forEach(j => document.getElementById(`btn-a${j}`).classList.remove('selected'));
+    if (!wasSelected) this.classList.add('selected');
+  });
+});
+
+async function callStory(messages, systemPrompt) {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${apiKey}`
+    },
+    body: JSON.stringify({
+      model: 'llama-3.3-70b-versatile',
+      max_tokens: 1200,
+      messages: [{ role: 'system', content: systemPrompt }, ...messages]
+    })
+  });
+  if (!res.ok) {
+    const e = await res.json().catch(() => ({}));
+    throw new Error(e?.error?.message || `HTTP ${res.status}`);
+  }
+  const data = await res.json();
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) throw new Error('Empty response');
+  return content;
+}
+
+function parse(raw) {
+  return JSON.parse(raw.replace(/```json|```/g, '').trim());
+}
+
+function setAIButtons(actions) {
+  [1,2,3,4].forEach(i => {
+    const btn = document.getElementById(`btn-a${i}`);
+    const text = actions && actions[i-1] ? actions[i-1] : '...';
+    btn.classList.remove('loading-action', 'selected');
+    btn.innerHTML = `<span class="ai-tag">AI</span><span class="ai-text">${text}</span>`;
+    btn.title = text;
+  });
+}
+
+function setAIButtonsLoading() {
+  [1,2,3,4].forEach(i => {
+    const btn = document.getElementById(`btn-a${i}`);
+    btn.classList.add('loading-action');
+    btn.classList.remove('selected');
+    btn.innerHTML = `<span class="ai-tag">AI</span><span class="ai-text">Thinking...</span>`;
+  });
+}
+
+// ─── CORB-proof image loader: tries Pollinations, falls back to canvas art ───
+function drawCanvasScene(prompt) {
+  const wrap = document.getElementById('scene-image-wrap');
+  const svgWrap = document.getElementById('scene-svg-wrap');
+  const imgLoading = document.getElementById('image-loading');
+
+  const canvas = document.createElement('canvas');
+  canvas.width = 1280; canvas.height = 560;
+  canvas.style.cssText = 'width:100%;height:100%;display:block;';
+  const ctx = canvas.getContext('2d');
+
+  // Pick palette from keywords in prompt
+  const p = prompt.toLowerCase();
+  let c1, c2, c3, c4;
+  if (p.includes('fire') || p.includes('apocalyptic') || p.includes('burn')) {
+    c1='#1a0500'; c2='#3d1200'; c3='#7a2800'; c4='#c45000';
+  } else if (p.includes('space') || p.includes('star') || p.includes('cosmos')) {
+    c1='#00010f'; c2='#050520'; c3='#0a0a40'; c4='#1a1060';
+  } else if (p.includes('forest') || p.includes('nature') || p.includes('green')) {
+    c1='#010a03'; c2='#031a08'; c3='#063312'; c4='#0a4d1c';
+  } else if (p.includes('ocean') || p.includes('sea') || p.includes('water')) {
+    c1='#000d1a'; c2='#001a33'; c3='#002b4d'; c4='#003d66';
+  } else if (p.includes('snow') || p.includes('ice') || p.includes('winter')) {
+    c1='#050a14'; c2='#0d1a2e'; c3='#1a2d4a'; c4='#2a4060';
+  } else if (p.includes('dark') || p.includes('shadow') || p.includes('noir')) {
+    c1='#050508'; c2='#0d0d14'; c3='#14141f'; c4='#1e1e2e';
+  } else {
+    c1='#080510'; c2='#12101e'; c3='#1e1830'; c4='#2a2040';
+  }
+
+  // Sky gradient
+  const sky = ctx.createLinearGradient(0, 0, 0, 380);
+  sky.addColorStop(0, c1); sky.addColorStop(0.5, c2);
+  sky.addColorStop(0.8, c3); sky.addColorStop(1, c4);
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, 1280, 560);
+
+  // Atmospheric glow
+  const glow = ctx.createRadialGradient(640, 200, 20, 640, 200, 500);
+  glow.addColorStop(0, 'rgba(201,168,76,0.12)');
+  glow.addColorStop(0.4, 'rgba(150,80,20,0.06)');
+  glow.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, 1280, 560);
+
+  // Layered horizon fog
+  for (let i = 0; i < 4; i++) {
+    const fog = ctx.createLinearGradient(0, 300 + i*30, 0, 420 + i*20);
+    fog.addColorStop(0, 'rgba(0,0,0,0)');
+    fog.addColorStop(0.5, `rgba(201,168,76,${0.03 - i*0.005})`);
+    fog.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = fog; ctx.fillRect(0, 300 + i*30, 1280, 90);
+  }
+
+  // Silhouette mountains/ruins
+  ctx.fillStyle = 'rgba(0,0,0,0.85)';
+  ctx.beginPath(); ctx.moveTo(0, 560);
+  const peaks = [
+    [0,420],[80,340],[160,390],[260,310],[350,360],[440,295],
+    [520,330],[600,280],[680,320],[760,270],[850,310],[940,260],
+    [1020,300],[1100,270],[1180,310],[1280,350],[1280,560]
+  ];
+  peaks.forEach(([x,y]) => ctx.lineTo(x, y));
+  ctx.closePath(); ctx.fill();
+
+  // Foreground dark land
+  const ground = ctx.createLinearGradient(0, 440, 0, 560);
+  ground.addColorStop(0, 'rgba(0,0,0,0.9)');
+  ground.addColorStop(1, '#000000');
+  ctx.fillStyle = ground; ctx.fillRect(0, 460, 1280, 100);
+
+  // Stars/particles if dark scene
+  if (!p.includes('day') && !p.includes('sun')) {
+    ctx.fillStyle = 'rgba(255,255,220,0.6)';
+    for (let i = 0; i < 80; i++) {
+      const x = Math.random()*1280, y = Math.random()*250;
+      const r = Math.random()*1.2;
+      ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI*2); ctx.fill();
+    }
+  }
+
+  // Vignette
+  const vig = ctx.createRadialGradient(640, 280, 100, 640, 280, 720);
+  vig.addColorStop(0, 'rgba(0,0,0,0)');
+  vig.addColorStop(1, 'rgba(0,0,0,0.75)');
+  ctx.fillStyle = vig; ctx.fillRect(0, 0, 1280, 560);
+
+  imgLoading.style.display = 'none';
+  svgWrap.appendChild(canvas);
+}
+
+async function loadSceneImage(prompt) {
+  const wrap = document.getElementById('scene-image-wrap');
+  const svgWrap = document.getElementById('scene-svg-wrap');
+  const imgLoading = document.getElementById('image-loading');
+
+  wrap.style.display = 'block';
+  imgLoading.style.display = 'flex';
+  imgLoading.textContent = 'Painting the scene...';
+  svgWrap.innerHTML = '';
+
+  const seed = Math.floor(Math.random() * 99999);
+  const encoded = encodeURIComponent(prompt + ', cinematic, atmospheric, dramatic lighting, highly detailed, painterly');
+  const url = `https://image.pollinations.ai/prompt/${encoded}?model=flux-schnell&width=1280&height=560&seed=${seed}&nologo=true&nofeed=true`;
+
+  // Try Pollinations — set a 12s timeout, fall back to canvas on any failure
+  const timer = setTimeout(() => { img.src = ''; drawCanvasScene(prompt); }, 12000);
+
+  const img = document.createElement('img');
+  img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 0.6s ease;';
+  img.crossOrigin = 'anonymous';
+  img.onload = () => {
+    clearTimeout(timer);
+    // CORB check: make sure it actually loaded pixels (naturalWidth > 0)
+    if (img.naturalWidth > 0) {
+      imgLoading.style.display = 'none';
+      svgWrap.appendChild(img);
+      requestAnimationFrame(() => { img.style.opacity = '1'; });
+    } else {
+      drawCanvasScene(prompt);
+    }
+  };
+  img.onerror = () => { clearTimeout(timer); drawCanvasScene(prompt); };
+  img.src = url;
+}
+// ─────────────────────────────────────────────────────────────────────────────
+
+function renderScene(parsed) {
+  document.getElementById('narrative').innerHTML = parsed.narrative.replace(/\n/g, '<br>');
+  if (parsed.world_changes) {
+    const wc = parsed.world_changes;
+    document.getElementById('ws-text').textContent = typeof wc === 'object' ? JSON.stringify(wc, null, 1).replace(/[{}"]/g,'').trim() : wc;
+    document.getElementById('world-state').style.display = 'block';
+  }
+  if (parsed.visual_prompt) {
+    const vs = document.getElementById('visual-strip');
+    vs.textContent = '🎨 ' + parsed.visual_prompt;
+    vs.style.display = 'block';
+    loadSceneImage(parsed.visual_prompt);
+  }
+  if (parsed.suggested_actions) {
+    setAIButtons(parsed.suggested_actions);
+  }
+}
+
+function getSelectedActions() {
+  const actions = [];
+  [1,2,3,4].forEach(i => {
+    const btn = document.getElementById(`btn-a${i}`);
+    if (btn.classList.contains('selected')) {
+      const text = btn.querySelector('.ai-text')?.textContent;
+      if (text && text !== 'Thinking...') actions.push(text);
+    }
+  });
+  const custom = document.getElementById('a5').value.trim();
+  if (custom) actions.push(custom);
+  return actions;
+}
+
+document.getElementById('begin-btn').addEventListener('click', async () => {
+  apiKey = document.getElementById('api-key').value.trim();
+  const errEl = document.getElementById('err-intro');
+  if (!apiKey) { errEl.style.display='block'; errEl.textContent='Please enter your Groq API key. Get one free at console.groq.com'; return; }
+  let activeGenre = genre;
+  if (genre === 'custom') {
+    const ct = document.getElementById('custom-input').value.trim();
+    if (!ct) { errEl.style.display='block'; errEl.textContent='Please describe your custom world.'; return; }
+    activeGenre = ct;
+  }
+  errEl.style.display = 'none';
+  const btn = document.getElementById('begin-btn');
+  btn.disabled = true;
+  btn.style.display = 'none';
+  const loadingEl = document.getElementById('intro-loading');
+  loadingEl.style.display = 'flex';
+  const gateMessages = ['The gates stir...', 'Ancient magic awakens...', 'Worlds take shape...', 'Characters emerge...', 'The story breathes...'];
+  let msgIdx = 0;
+  const gateTextEl = document.getElementById('gate-text');
+  const msgInterval = setInterval(() => {
+    msgIdx = (msgIdx + 1) % gateMessages.length;
+    gateTextEl.textContent = gateMessages[msgIdx];
+  }, 1800);
+  const initMsg = `Ready to begin. Genre/World: ${activeGenre}. Set the opening scene and world state. Give me my starting situation and 4 suggested first actions.`;
+  history = [{ role: 'user', content: initMsg }];
+  try {
+    const raw = await callStory(history, STORY_SYSTEM);
+    const parsed = parse(raw);
+    history.push({ role: 'assistant', content: raw });
+    clearInterval(msgInterval);
+    document.getElementById('intro').style.display = 'none';
+    document.getElementById('game').style.display = 'block';
+    turn = 1;
+    genreLabel = genre === 'custom' ? 'Custom World' : activeGenre;
+    document.getElementById('turn-label').textContent = `Turn ${turn} · ${genreLabel}`;
+    renderScene(parsed);
+    document.getElementById('a5').focus();
+  } catch(e) {
+    clearInterval(msgInterval);
+    loadingEl.style.display = 'none';
+    btn.style.display = '';
+    btn.disabled = false;
+    errEl.style.display = 'block';
+    errEl.textContent = 'Failed to start: ' + e.message;
+  }
+});
+
+async function submitActions() {
+  const actions = getSelectedActions();
+  if (!actions.length) {
+    const e = document.getElementById('err-game');
+    e.style.display = 'block';
+    e.textContent = 'Select at least one action or write your own in field 5.';
+    setTimeout(() => e.style.display = 'none', 3000);
+    return;
+  }
+  document.getElementById('err-game').style.display = 'none';
+  document.getElementById('loading').style.display = 'block';
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('narrative').style.opacity = '0.5';
+  setAIButtonsLoading();
+  const content = 'My actions this turn:\n' + actions.map((a,i) => `${i+1}. ${a}`).join('\n');
+  history.push({ role: 'user', content });
+  try {
+    const raw = await callStory(history, STORY_SYSTEM);
+    const parsed = parse(raw);
+    history.push({ role: 'assistant', content: raw });
+    document.getElementById('a5').value = '';
+    [1,2,3,4].forEach(i => document.getElementById(`btn-a${i}`).classList.remove('selected'));
+    turn++;
+    document.getElementById('turn-label').textContent = `Turn ${turn} · ${genreLabel}`;
+    renderScene(parsed);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    document.getElementById('a5').focus();
+  } catch(e) {
+    document.getElementById('err-game').style.display = 'block';
+    document.getElementById('err-game').textContent = 'Error: ' + e.message;
+    history.pop();
+    setAIButtonsLoading();
+  }
+  document.getElementById('narrative').style.opacity = '1';
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('submit-btn').disabled = false;
+}
+
+document.getElementById('submit-btn').addEventListener('click', submitActions);
+document.getElementById('a5').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); submitActions(); }
+});
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').then(() => console.log('Service Worker registered'));
+}
+
+</script>
+</body>
+</html>
