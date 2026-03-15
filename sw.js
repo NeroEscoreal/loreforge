@@ -1,4 +1,4 @@
-const cacheName = 'loreforge-cache-v1';
+const cacheName = 'loreforge-cache-v2';
 const filesToCache = [
   '/',
   '/index.html',
