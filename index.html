@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#c9a84c">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Loreforge</title>
+<style>
+:root{--bg:#0a0a0f;--surface:#111118;--surface2:#181820;--surface3:#1e1e2a;--border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);--gold:#c9a84c;--gold-dim:#7a5f28;--gold-faint:rgba(201,168,76,0.06);--green:#4caf72;--green-dim:#2d6b44;--green-faint:rgba(76,175,114,0.07);--red:#e07070;--red-faint:rgba(160,48,48,0.12);--blue:#6ba3c9;--blue-faint:rgba(76,130,175,0.07);--purple:#9b7ec9;--purple-faint:rgba(155,126,201,0.07);--text:#e8e2d5;--text-dim:#8a8070;--text-muted:#4a4540;--radius:8px;--font-display:'Palatino Linotype','Book Antiqua',Palatino,'Times New Roman',serif;--font-body:Georgia,'Times New Roman',serif}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--text);font-family:var(--font-body);font-size:17px;min-height:100vh;display:flex;flex-direction:column;align-items:center;overflow-x:hidden;background-image:radial-gradient(ellipse 80% 40% at 50% 0%,rgba(100,70,20,0.12) 0%,transparent 70%),repeating-linear-gradient(0deg,transparent,transparent 60px,rgba(255,255,255,0.012) 60px,rgba(255,255,255,0.012) 61px)}
+header{width:100%;max-width:760px;padding:1.75rem 1.25rem 0.5rem;display:flex;align-items:center;justify-content:space-between}
+.logo{font-family:var(--font-display);font-size:15px;letter-spacing:0.22em;color:var(--gold);text-transform:uppercase;font-weight:normal}
+.header-right{display:flex;align-items:center;gap:8px}
+.turn-badge{font-size:11px;letter-spacing:0.12em;color:var(--text-muted);font-family:var(--font-display);text-transform:uppercase}
+.world-age-badge{font-size:10px;letter-spacing:0.1em;color:var(--gold-dim);font-family:var(--font-display);background:var(--gold-faint);border:0.5px solid rgba(201,168,76,0.15);border-radius:4px;padding:2px 7px;display:none}
+.header-btn{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:5px 9px;font-size:10px;color:var(--text-muted);font-family:var(--font-display);letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;display:none;line-height:1;transition:all 0.2s}
+.header-btn:hover{border-color:var(--gold-dim);color:var(--text-dim)}
+header{width:100%;max-width:760px;padding:1.75rem 1.25rem 0.5rem;display:flex;align-items:center;justify-content:space-between}
+main{width:100%;max-width:760px;padding:0 1.25rem 5rem;flex:1}
+#intro{display:flex;flex-direction:column;align-items:center;padding-top:2.5rem;text-align:center}
+.ornament{font-size:22px;color:var(--gold-dim);letter-spacing:0.6em;margin-bottom:1.25rem;opacity:0.7}
+h1{font-family:var(--font-display);font-size:clamp(24px,6vw,36px);font-weight:normal;letter-spacing:0.06em;color:var(--text);line-height:1.25;margin-bottom:0.75rem}
+.subtitle{font-size:15px;color:var(--text-dim);font-style:italic;line-height:1.7;max-width:360px;margin-bottom:2.25rem}
+.genre-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%;max-width:440px}
+.genre-btn{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:13px 10px;cursor:pointer;color:var(--text-muted);font-family:var(--font-display);font-size:11px;letter-spacing:0.12em;text-transform:uppercase;transition:all 0.2s;text-align:center;font-weight:normal}
+.genre-btn:hover{border-color:var(--gold-dim);color:var(--text-dim);background:var(--surface2)}
+.genre-btn.selected{border-color:var(--gold);color:var(--gold);background:var(--gold-faint)}
+.genre-btn.custom-btn{grid-column:1/-1;border-color:rgba(201,168,76,0.2);color:var(--gold-dim)}
+.genre-btn.custom-btn.selected{border-color:var(--gold);color:var(--gold)}
+#custom-wrap{display:none;width:100%;max-width:440px;margin-top:8px}
+#custom-input{width:100%;background:var(--surface);border:0.5px solid rgba(201,168,76,0.25);border-radius:var(--radius);padding:10px 14px;color:var(--text);font-family:var(--font-body);font-size:15px;font-style:italic;outline:none;resize:none;min-height:72px;line-height:1.6;transition:border-color 0.2s}
+#custom-input:focus{border-color:var(--gold-dim)}
+#custom-input::placeholder{color:var(--text-muted)}
+.field-hint{font-size:11px;color:var(--text-muted);font-style:italic;margin-top:5px;text-align:left}
+.begin-btn{background:transparent;border:1px solid var(--gold);border-radius:var(--radius);padding:13px 44px;color:var(--gold);font-family:var(--font-display);font-size:12px;letter-spacing:0.18em;text-transform:uppercase;cursor:pointer;transition:all 0.25s;position:relative;overflow:hidden;font-weight:normal}
+.begin-btn::before{content:'';position:absolute;inset:0;background:rgba(201,168,76,0.08);transform:scaleX(0);transform-origin:left;transition:transform 0.3s ease}
+.begin-btn:hover::before{transform:scaleX(1)}
+.begin-btn:disabled{opacity:0.5;cursor:not-allowed}
+#intro-loading{display:none;flex-direction:column;align-items:center;gap:1rem;margin-top:1.5rem;width:100%;max-width:440px}
+.gate-bar-wrap{width:100%;height:1.5px;background:var(--border);border-radius:2px;overflow:hidden}
+.gate-bar{height:100%;width:0%;background:linear-gradient(90deg,var(--gold-dim),var(--gold));animation:gateProgress 9s ease-out forwards}
+@keyframes gateProgress{0%{width:0%}20%{width:30%}50%{width:60%}80%{width:82%}100%{width:93%}}
+.gate-text{font-family:var(--font-display);font-size:11px;letter-spacing:0.18em;text-transform:uppercase;color:var(--gold-dim);animation:fpulse 1.4s ease-in-out infinite}
+.gate-runes{font-size:16px;letter-spacing:0.4em;color:var(--gold-dim);animation:runesAnim 2.5s ease-in-out infinite}
+@keyframes fpulse{0%,100%{opacity:0.35}50%{opacity:1}}
+@keyframes runesAnim{0%,100%{opacity:0.25;letter-spacing:0.2em}50%{opacity:0.65;letter-spacing:0.6em}}
+.err{display:none;background:var(--red-faint);border:0.5px solid rgba(160,48,48,0.3);border-radius:var(--radius);padding:9px 13px;font-size:13px;color:var(--red);margin-top:10px;line-height:1.5;max-width:440px;text-align:left}
+#game{display:none}
+.divider{height:0.5px;background:linear-gradient(90deg,transparent,var(--border2),transparent);margin:1.25rem 0}
+#scene-image-wrap{display:none;width:100%;border-radius:var(--radius);overflow:hidden;margin-bottom:10px;position:relative;background:var(--surface);border:0.5px solid var(--border);aspect-ratio:16/7}
+#image-loading{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:12px;font-style:italic;color:var(--text-muted);letter-spacing:0.08em}
+#narrative{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:1.5rem 1.75rem;min-height:120px;line-height:1.85;font-size:17px;color:var(--text);margin-bottom:8px;transition:opacity 0.3s;position:relative}
+#narrative::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold-dim),transparent);opacity:0.5}
+#visual-strip{border-left:1.5px solid var(--gold-dim);padding:6px 12px;font-size:12px;font-style:italic;color:var(--text-muted);line-height:1.55;margin-bottom:1.25rem;display:none}
+#loading{display:none;text-align:center;padding:0.75rem 0 0;font-style:italic;font-size:13px;color:var(--text-muted)}
+@keyframes pulse{0%,100%{opacity:0.3}50%{opacity:1}}
+#loading span{animation:pulse 1.6s ease-in-out infinite}
+.section-label{font-family:var(--font-display);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:10px;display:block}
+.actions-list{display:flex;flex-direction:column;gap:7px;margin-bottom:8px}
+.action-row{display:flex;align-items:center;gap:8px}
+.action-num{font-family:var(--font-display);font-size:11px;color:var(--text-muted);min-width:14px;text-align:right;flex-shrink:0}
+.ai-action-btn{flex:1;background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:9px 13px;color:var(--text-dim);font-family:var(--font-body);font-size:15px;text-align:left;cursor:pointer;transition:all 0.18s;line-height:1.4;font-style:italic;position:relative;overflow:hidden;white-space:normal;word-break:break-word}
+.ai-action-btn:hover{border-color:var(--gold-dim);color:var(--text);background:var(--surface2)}
+.ai-action-btn.selected{border-color:var(--gold);color:var(--gold);background:var(--gold-faint);font-style:normal}
+.ai-action-btn .ai-tag{font-size:9px;letter-spacing:0.1em;color:var(--text-muted);font-family:var(--font-display);text-transform:uppercase;margin-right:6px;font-style:normal}
+.ai-action-btn.loading-action{color:var(--text-muted);font-style:italic}
+.action-field{flex:1;background:var(--surface);border:0.5px solid rgba(201,168,76,0.2);border-radius:var(--radius);padding:9px 13px;color:var(--text);font-family:var(--font-body);font-size:15px;outline:none;transition:border-color 0.2s}
+.action-field:focus{border-color:var(--gold-dim)}
+.action-field::placeholder{color:var(--gold-dim);font-style:italic}
+.actions-note{font-size:12px;color:var(--text-muted);font-style:italic;margin-bottom:10px}
+.submit-btn{width:100%;margin-top:4px;background:transparent;border:0.5px solid var(--border2);border-radius:var(--radius);padding:11px;color:var(--text-dim);font-family:var(--font-display);font-size:11px;letter-spacing:0.14em;text-transform:uppercase;cursor:pointer;transition:all 0.2s;font-weight:normal}
+.submit-btn:hover{border-color:var(--gold-dim);color:var(--gold)}
+.submit-btn:disabled{opacity:0.35;cursor:not-allowed}
+.submit-btn:active{transform:scale(0.99)}
+#err-game{display:none;background:var(--red-faint);border:0.5px solid rgba(160,48,48,0.3);border-radius:var(--radius);padding:9px 13px;font-size:13px;color:var(--red);margin-top:8px}
+.panel-label{font-family:var(--font-display);font-size:10px;letter-spacing:0.15em;text-transform:uppercase;color:var(--text-muted);margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.panel-label-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.dot-green{background:var(--green)}.dot-gold{background:var(--gold)}.dot-blue{background:var(--blue)}.dot-red{background:var(--red)}.dot-purple{background:var(--purple)}
+.stat-row{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:6px}
+.stat-key{color:var(--text-muted);font-size:12px;font-family:var(--font-display);letter-spacing:0.08em;flex-shrink:0}
+.stat-val{color:var(--text);font-size:13px;text-align:right;word-break:break-word}
+.stat-val.hp{color:var(--green)}.stat-val.status-bad{color:var(--red)}
+/* TABS */
+.tab-bar{display:flex;gap:0;margin-bottom:0;border-bottom:0.5px solid var(--border2);position:relative}
+.tab-btn{flex:1;background:none;border:none;padding:10px 4px;font-family:var(--font-display);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);cursor:pointer;transition:all 0.2s;position:relative;text-align:center}
+.tab-btn.active{color:var(--gold)}
+.tab-btn .tab-count{font-size:9px;color:var(--text-muted);margin-left:3px}
+.tab-indicator{position:absolute;bottom:-1px;height:1.5px;background:var(--gold);transition:left 0.25s ease,width 0.25s ease}
+.tab-content-wrap{position:relative;overflow:hidden;min-height:60px;touch-action:pan-y}
+.tab-panels{display:flex;transition:transform 0.25s ease}
+.tab-panel{min-width:100%;padding:8px 0}
+/* COLLAPSIBLE */
+.collapsible{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:6px;overflow:hidden}
+.collapsible-header{display:flex;align-items:center;gap:8px;padding:10px 12px;cursor:pointer;user-select:none;transition:background 0.15s}
+.collapsible-header:active{background:rgba(255,255,255,0.02)}
+.collapsible-arrow{font-size:9px;color:var(--text-muted);transition:transform 0.2s;width:12px;text-align:center}
+.collapsible.open .collapsible-arrow{transform:rotate(90deg)}
+.collapsible-title{font-family:var(--font-display);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--text-muted);flex:1}
+.collapsible-count{font-size:9px;color:var(--text-muted);background:var(--surface3);padding:1px 6px;border-radius:3px}
+.collapsible-body{max-height:0;overflow:hidden;transition:max-height 0.3s ease}
+.collapsible.open .collapsible-body{max-height:800px}
+.collapsible-inner{padding:0 12px 10px}
+/* NPC ITEMS */
+.npc-item{background:var(--surface3);border:0.5px solid var(--border);border-radius:var(--radius);margin-bottom:5px;overflow:hidden}
+.npc-header{display:flex;align-items:center;gap:8px;padding:8px 10px;cursor:pointer}
+.npc-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.npc-dot.ally{background:var(--green)}.npc-dot.hostile{background:var(--red)}.npc-dot.neutral{background:var(--gold)}.npc-dot.unknown{background:var(--text-muted)}.npc-dot.dead{background:#333}
+.npc-name{color:var(--text);font-size:13px;flex:1}
+.npc-status{color:var(--text-muted);font-size:11px;font-style:italic}
+.npc-trust-bar{height:3px;background:var(--surface);border-radius:2px;margin:0 10px 6px;overflow:hidden}
+.npc-trust-fill{height:100%;border-radius:2px;transition:width 0.4s ease}
+.npc-memory{max-height:0;overflow:hidden;transition:max-height 0.3s ease}
+.npc-item.open .npc-memory{max-height:300px}
+.npc-memory-inner{padding:0 10px 8px;font-size:12px;color:var(--text-dim);line-height:1.6}
+.npc-memory-item{padding:3px 0;border-bottom:0.5px solid var(--border);color:var(--text-muted);font-style:italic}
+/* INVENTORY */
+.inv-grid{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+.inv-item{background:var(--surface3);border:0.5px solid var(--border2);border-radius:5px;padding:5px 10px;font-size:12px;color:var(--text-dim);font-family:var(--font-display);letter-spacing:0.05em;white-space:nowrap;cursor:pointer;transition:all 0.15s}
+.inv-item:active{transform:scale(0.95)}
+.inv-item.equipped{border-color:var(--gold-dim);color:var(--gold)}
+.inv-item.new{border-color:var(--green-dim);color:var(--green)}
+.inv-empty{font-style:italic;color:var(--text-muted);font-size:12px}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:100;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.2s}
+.modal-overlay.show{opacity:1;pointer-events:auto}
+.modal-sheet{background:var(--surface2);border:0.5px solid var(--border2);border-radius:var(--radius) var(--radius) 0 0;width:100%;max-width:500px;max-height:60vh;padding:1.25rem;transform:translateY(100%);transition:transform 0.25s ease}
+.modal-overlay.show .modal-sheet{transform:translateY(0)}
+.modal-handle{width:32px;height:3px;background:var(--border2);border-radius:2px;margin:0 auto 12px}
+.modal-title{font-family:var(--font-display);font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
+.modal-body{font-size:14px;color:var(--text-dim);line-height:1.6}
+.modal-actions{display:flex;gap:8px;margin-top:12px}
+.modal-action-btn{flex:1;padding:9px;border-radius:var(--radius);font-family:var(--font-display);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;cursor:pointer;transition:all 0.15s;border:0.5px solid var(--border2);background:var(--surface);color:var(--text-dim)}
+.modal-action-btn:hover{border-color:var(--gold-dim);color:var(--text)}
+.modal-action-btn.danger{border-color:rgba(160,48,48,0.3);color:var(--red)}
+.modal-action-btn.danger:hover{background:var(--red-faint)}
+/* LOCATION HISTORY */
+.loc-list{display:flex;flex-direction:column;gap:3px}
+.loc-item{font-size:12px;color:var(--text-dim);padding:3px 0;display:flex;align-items:center;gap:6px}
+.loc-dot{width:4px;height:4px;border-radius:50%;background:var(--gold-dim);flex-shrink:0}
+.loc-current{color:var(--gold)}
+/* FACTION */
+.faction-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.faction-name{font-size:12px;color:var(--text-dim);font-family:var(--font-display)}
+.faction-bar-wrap{width:80px;height:4px;background:var(--surface);border-radius:2px;overflow:hidden;margin:0 8px;flex-shrink:0}
+.faction-bar{height:100%;border-radius:2px;transition:width 0.4s ease}
+.faction-val{font-size:11px;color:var(--text-muted);min-width:24px;text-align:right}
+/* TITLES */
+.title-tag{display:inline-block;background:var(--gold-faint);border:0.5px solid rgba(201,168,76,0.2);border-radius:4px;padding:2px 8px;font-size:11px;color:var(--gold);font-family:var(--font-display);letter-spacing:0.05em;margin:2px}
+/* RUMORS */
+.rumor-box{background:var(--surface3);border:0.5px solid var(--border);border-radius:var(--radius);padding:8px 10px;margin-bottom:6px}
+.rumor-label{font-size:9px;color:var(--text-muted);font-family:var(--font-display);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:3px}
+.rumor-text{font-size:12px;color:var(--text-dim);font-style:italic;line-height:1.5}
+/* END STATS */
+#end-screen{display:none;position:fixed;inset:0;background:var(--bg);z-index:200;overflow-y:auto}
+.end-content{max-width:440px;margin:0 auto;padding:3rem 1.5rem;text-align:center}
+.end-title{font-family:var(--font-display);font-size:clamp(22px,5vw,30px);color:var(--gold);letter-spacing:0.06em;margin-bottom:0.5rem}
+.end-subtitle{font-size:14px;color:var(--text-dim);font-style:italic;margin-bottom:2rem}
+.end-stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:2rem}
+.end-stat{background:var(--surface2);border:0.5px solid var(--border);border-radius:var(--radius);padding:12px}
+.end-stat-val{font-family:var(--font-display);font-size:22px;color:var(--gold);margin-bottom:2px}
+.end-stat-key{font-size:10px;color:var(--text-muted);font-family:var(--font-display);letter-spacing:0.1em;text-transform:uppercase}
+.end-titles{margin-bottom:2rem}
+@media(max-width:480px){header{padding:1.25rem 1rem 0.25rem}main{padding:0 1rem 5rem}#narrative{padding:1.25rem}h1{font-size:26px}}
+</style>
+</head>
+<body>
+<header>
+<span class="logo">Loreforge</span>
+<div class="header-right">
+<span class="world-age-badge" id="world-age-badge"></span>
+<button class="header-btn" id="save-btn">Save</button>
+<button class="header-btn" id="load-btn">Load</button>
+<span class="turn-badge" id="turn-label"></span>
+</div>
+</header>
+<main>
+<div id="intro">
+<div class="ornament">&#10022; &#10022; &#10022;</div>
+<h1>Choose Your World</h1>
+<p class="subtitle">An immersive turn-based story engine. Each turn the AI suggests actions &mdash; or write your own.</p>
+<div class="genre-grid">
+<button class="genre-btn selected" data-genre="dark fantasy">Dark Fantasy</button>
+<button class="genre-btn" data-genre="sci-fi space opera">Space Opera</button>
+<button class="genre-btn" data-genre="post-apocalyptic">Post-Apocalyptic</button>
+<button class="genre-btn" data-genre="noir mystery">Noir Mystery</button>
+<button class="genre-btn" data-genre="epic medieval">Epic Medieval</button>
+<button class="genre-btn" data-genre="cosmic horror">Cosmic Horror</button>
+<button class="genre-btn custom-btn" data-genre="custom">&#10022; Custom World</button>
+</div>
+<div id="custom-wrap">
+<textarea id="custom-input" placeholder="Describe your world..." maxlength="400"></textarea>
+<p class="field-hint">Describe the setting, tone, rules &mdash; anything you can imagine.</p>
+</div>
+<button class="begin-btn" id="begin-btn" style="margin-top:1.5rem">Begin the Tale</button>
+<div class="err" id="err-intro"></div>
+<div id="intro-loading">
+<div class="gate-runes">&#10022; &#10022; &#10022;</div>
+<div class="gate-bar-wrap"><div class="gate-bar" id="gate-bar"></div></div>
+<div class="gate-text" id="gate-text">The gates stir...</div>
+</div>
+</div>
+<div id="game">
+<div class="divider" style="margin-top:0.75rem"></div>
+<div id="scene-image-wrap">
+<div id="image-loading">Painting the scene...</div>
+<div id="scene-svg-wrap" style="width:100%;height:100%;display:block"></div>
+</div>
+<div id="narrative"><span style="color:var(--text-muted);font-style:italic;font-size:15px">The world stirs...</span></div>
+<div id="rumors-container"></div>
+<!-- TABS -->
+<div class="tab-bar" id="tab-bar">
+<button class="tab-btn active" data-tab="0">Stats</button>
+<button class="tab-btn" data-tab="1">Inventory <span class="tab-count" id="inv-count"></span></button>
+<button class="tab-btn" data-tab="2">NPCs <span class="tab-count" id="npc-count"></span></button>
+<button class="tab-btn" data-tab="3">Realm</button>
+<div class="tab-indicator" id="tab-indicator"></div>
+</div>
+<div class="tab-content-wrap" id="tab-content-wrap">
+<div class="tab-panels" id="tab-panels">
+<!-- STATS TAB -->
+<div class="tab-panel" id="tab-stats">
+<div class="collapsible open" id="col-player">
+<div class="collapsible-header" onclick="toggleCollapsible('col-player')">
+<span class="collapsible-arrow">&#9654;</span>
+<span class="collapsible-title">Player State</span>
+</div>
+<div class="collapsible-body"><div class="collapsible-inner" id="player-stats-body"></div></div>
+</div>
+<div class="collapsible" id="col-world">
+<div class="collapsible-header" onclick="toggleCollapsible('col-world')">
+<span class="collapsible-arrow">&#9654;</span>
+<span class="collapsible-title">World State</span>
+</div>
+<div class="collapsible-body"><div class="collapsible-inner" id="world-body"></div></div>
+</div>
+<div class="collapsible" id="col-factions">
+<div class="collapsible-header" onclick="toggleCollapsible('col-factions')">
+<span class="collapsible-arrow">&#9654;</span>
+<span class="collapsible-title">Factions</span>
+<span class="collapsible-count" id="faction-count"></span>
+</div>
+<div class="collapsible-body"><div class="collapsible-inner" id="faction-body"></div></div>
+</div>
+<div class="collapsible" id="col-locations">
+<div class="collapsible-header" onclick="toggleCollapsible('col-locations')">
+<span class="collapsible-arrow">&#9654;</span>
+<span class="collapsible-title">Location History</span>
+<span class="collapsible-count" id="loc-count"></span>
+</div>
+<div class="collapsible-body"><div class="collapsible-inner" id="loc-body"></div></div>
+</div>
+<div class="collapsible" id="col-titles">
+<div class="collapsible-header" onclick="toggleCollapsible('col-titles')">
+<span class="collapsible-arrow">&#9654;</span>
+<span class="collapsible-title">Titles</span>
+</div>
+<div class="collapsible-body"><div class="collapsible-inner" id="titles-body"></div></div>
+</div>
+</div>
+<!-- INVENTORY TAB -->
+<div class="tab-panel" id="tab-inventory">
+<div class="inv-grid" id="inv-grid"></div>
+<p class="inv-empty" id="inv-empty">Your pack is empty.</p>
+</div>
+<!-- NPCS TAB -->
+<div class="tab-panel" id="tab-npcs">
+<div id="npc-list"></div>
+<p class="inv-empty" id="npc-empty">No one has crossed your path yet.</p>
+</div>
+<!-- REALM TAB -->
+<div class="tab-panel" id="tab-realm">
+<div id="realm-body"></div>
+<p class="inv-empty" id="realm-empty">No settlement under your control.</p>
+</div>
+</div>
+</div>
+<div id="visual-strip"></div>
+<div id="loading"><span>The world responds to your actions...</span></div>
+<div class="divider"></div>
+<span class="section-label">Choose an Action or Write Your Own</span>
+<p class="actions-note">Click a suggested action to select it &mdash; or type your own in action 5.</p>
+<div class="actions-list">
+<div class="action-row"><span class="action-num">1</span><button class="ai-action-btn loading-action" id="btn-a1"><span class="ai-tag">AI</span><span class="ai-text">Waiting...</span></button></div>
+<div class="action-row"><span class="action-num">2</span><button class="ai-action-btn loading-action" id="btn-a2"><span class="ai-tag">AI</span><span class="ai-text">Waiting...</span></button></div>
+<div class="action-row"><span class="action-num">3</span><button class="ai-action-btn loading-action" id="btn-a3"><span class="ai-tag">AI</span><span class="ai-text">Waiting...</span></button></div>
+<div class="action-row"><span class="action-num">4</span><button class="ai-action-btn loading-action" id="btn-a4"><span class="ai-tag">AI</span><span class="ai-text">Waiting...</span></button></div>
+<div class="action-row"><span class="action-num">5</span><input class="action-field" id="a5" placeholder="Your custom action..." /></div>
+</div>
+<button class="submit-btn" id="submit-btn">Act Upon the World</button>
+<div id="err-game"></div>
+</div>
+</main>
+<!-- ITEM MODAL -->
+<div class="modal-overlay" id="item-modal">
+<div class="modal-sheet">
+<div class="modal-handle"></div>
+<div class="modal-title" id="modal-item-name"></div>
+<div class="modal-body" id="modal-item-desc"></div>
+<div class="modal-actions">
+<button class="modal-action-btn" onclick="closeModal()">Close</button>
+<button class="modal-action-btn" id="modal-equip-btn" onclick="equipItem()">Equip</button>
+<button class="modal-action-btn danger" onclick="dropItem()">Drop</button>
+</div>
+</div>
+</div>
+<!-- END SCREEN -->
+<div id="end-screen">
+<div class="end-content">
+<div class="ornament">&#10022; &#10022; &#10022;</div>
+<div class="end-title" id="end-title">Your Tale Ends</div>
+<div class="end-subtitle" id="end-subtitle">The world remembers you.</div>
+<div class="end-stats-grid" id="end-stats-grid"></div>
+<div class="end-titles" id="end-titles"></div>
+<button class="begin-btn" onclick="location.reload()">Begin Anew</button>
+</div>
+</div>
+<script>
+const STORY_SYSTEM=`You are an Interactive Story Game Engine AI. Create a fully immersive, turn-based world.
+
+Rules:
+1. Each turn the player gives up to 5 actions (5th is their free custom action).
+2. Narrate outcomes, consequences, NPC reactions, environmental changes, emotional responses. Write 5-8 rich cinematic sentences.
+3. Keep narration cinematic, immersive, consistent with the genre.
+4. Generate a short vivid visual_prompt for image generation representing ONLY this specific scene.
+5. The world is ALIVE: introduce NPCs organically, have them react, remember history, let them grow or die. Always track at least 1-3 active characters.
+6. Never control the player character. Only describe world responses.
+7. After the narrative, always suggest exactly 4 possible next actions.
+8. If the player governs/resides in a settlement, populate 'realm_state' with population, economy, military, food, happiness.
+9. Keep 'npcs' array as the DEFINITIVE current list. Each NPC must have: name, relation (ally|neutral|hostile|dead|unknown), note, trust (0-100 integer), memory (array of 1-3 short strings remembering key interactions with the player).
+10. Ensure 'narrative' separates descriptions from dialogue using a single --- line.
+11. Keep all state objects simple human-readable strings except trust (number) and memory (string array).
+12. Populate 'factions' object with faction names as keys and reputation scores (-100 to 100) as values. At least 2-3 factions if setting allows.
+13. Populate 'titles' array with any titles the player has earned based on their actions (e.g. "The Wanderer", "Dragon Slayer", "Bandit King"). Update as actions change.
+14. Populate 'location_discovered' with the name of any NEW location the player visits this turn (or null if staying).
+15. Populate 'major_events' array with 0-2 significant story events this turn (e.g. "Burned Oakwood Village", "Saved Sir Aldric"). Only truly memorable moments.
+16. Populate 'rumors' array with 0-2 short strings of what NPCs are saying about the player (e.g. "They say a stranger single-handedly defeated the wolf pack").
+17. Populate 'world_age' with the current in-world year (start at "Year 1", advance 1 year every ~25 turns or when major time skips happen).
+18. Populate 'personality' with the player's emerging alignment based on their cumulative actions (e.g. "Compassionate", "Ruthless", "Opportunistic", "Honorable", "Deceptive", "Neutral").
+19. Populate 'reputation' with a single word: "Unknown", "Noticed", "Known", "Famous", or "Legendary" (or "Feared" if negative).
+20. If player HP reaches 0 or the story ends, set "game_over": true and "end_summary" with a short epitaph.
+
+IMPORTANT - Respond ONLY with valid JSON:
+{
+  "narrative":"<5-8 sentences with --- separating description from dialogue>",
+  "player_state":{"hp":"<e.g. 18/20>","status":"<e.g. Healthy>","location":"<current location>","gold":"<amount or N/A>","xp":"<amount or N/A>","reputation":"<Unknown|Noticed|Known|Famous|Legendary|Feared>","personality":"<e.g. Compassionate>"},
+  "inventory_changes":{"added":["<item>"],"removed":["<item>"],"equipped":["<item>"]},
+  "world_state":{"time":"<Dusk>","weather":"<Stormy>","environment":"<brief note>","faction_tension":"<brief note or omit>","world_age":"<Year 1>"},
+  "factions":{"<Faction Name>":<reputation -100 to 100>},
+  "npcs":[{"name":"<name>","relation":"ally|neutral|hostile|dead|unknown","note":"<status>","trust":<0-100>,"memory":["<event 1>","<event 2>"]}],
+  "realm_state":{"name":"<name>","type":"<Outpost|Kingdom|etc>","population":<number>,"economy":"<Treasury: X Gold, GDP: Stable>","military":"<Defenders: Moderate>","food":<0-100>,"happiness":<0-100>,"geopolitics":"<brief>","relationship":"<brief>"},
+  "titles":["<earned title>"],
+  "location_discovered":"<new location name or null>",
+  "major_events":["<event>"],
+  "rumors":["<rumor>"],
+  "visual_prompt":"<unique scene prompt, art style: dark oil painting, cinematic>",
+  "suggested_actions":["<action 1>","<action 2>","<action 3>","<action 4>"],
+  "game_over":false,
+  "end_summary":"<epitaph if game_over true, else omit>"
+}`;
+
+let apiKey='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';
+let genre='dark fantasy',genreLabel='dark fantasy',history=[],turn=0;
+let playerState={},inventory=[],npcRegistry={},currentRealmState=null;
+let factions={},titles=[],locationHistory=[],majorEvents=[],rumors=[];
+let worldAge='Year 1',personality='Neutral',reputation='Unknown';
+let totalGoldEarned=0,totalEnemiesDefeated=0,npcsMet=0,locationsVisited=0;
+let selectedItemIdx=-1;
+let currentTab=0;
+const SAVE_KEY='loreforge_save_v2';
+
+// GENRE SELECTOR
+document.querySelectorAll('.genre-btn').forEach(btn=>{
+btn.addEventListener('click',()=>{
+document.querySelectorAll('.genre-btn').forEach(b=>b.classList.remove('selected'));
+btn.classList.add('selected');genre=btn.dataset.genre;
+const wrap=document.getElementById('custom-wrap');
+wrap.style.display=genre==='custom'?'block':'none';
+if(genre==='custom')document.getElementById('custom-input').focus();
+});
+});
+
+// ACTION BUTTONS
+[1,2,3,4].forEach(i=>{
+document.getElementById(`btn-a${i}`).addEventListener('click',function(){
+const was=this.classList.contains('selected');
+[1,2,3,4].forEach(j=>document.getElementById(`btn-a${j}`).classList.remove('selected'));
+if(!was)this.classList.add('selected');
+});
+});
+
+// TABS
+function initTabs(){
+const wrap=document.getElementById('tab-content-wrap');
+const panels=document.getElementById('tab-panels');
+const btns=document.querySelectorAll('.tab-btn');
+const indicator=document.getElementById('tab-indicator');
+function goToTab(idx){
+currentTab=idx;
+panels.style.transform=`translateX(-${idx*100}%)`;
+btns.forEach((b,i)=>b.classList.toggle('active',i===idx));
+const btn=btns[idx];
+indicator.style.left=btn.offsetLeft+'px';
+indicator.style.width=btn.offsetWidth+'px';
+}
+btns.forEach(b=>b.addEventListener('click',()=>goToTab(parseInt(b.dataset.tab))));
+let touchStartX=0,touchStartY=0;
+wrap.addEventListener('touchstart',e=>{touchStartX=e.touches[0].clientX;touchStartY=e.touches[0].clientY},{passive:true});
+wrap.addEventListener('touchend',e=>{
+const dx=e.changedTouches[0].clientX-touchStartX;
+const dy=e.changedTouches[0].clientY-touchStartY;
+if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)){
+if(dx<0&&currentTab<3)goToTab(currentTab+1);
+else if(dx>0&&currentTab>0)goToTab(currentTab-1);
+}
+},{passive:true});
+goToTab(0);
+}
+
+// COLLAPSIBLES
+function toggleCollapsible(id){
+document.getElementById(id).classList.toggle('open');
+}
+
+// API
+async function callStory(messages,systemPrompt){
+const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+method:'POST',
+headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`},
+body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:1600,temperature:0.88,messages:[{role:'system',content:systemPrompt},...messages]})
+});
+if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${res.status}`);}
+const data=await res.json();const content=data.choices?.[0]?.message?.content;
+if(!content)throw new Error('Empty response');return content;
+}
+function parse(raw){return JSON.parse(raw.replace(/```json|```/g,'').trim());}
+
+// ACTION BUTTONS UI
+function setAIButtons(actions){
+[1,2,3,4].forEach(i=>{
+const btn=document.getElementById(`btn-a${i}`);
+const text=actions&&actions[i-1]?actions[i-1]:'...';
+btn.classList.remove('loading-action','selected');
+btn.innerHTML=`<span class="ai-tag">AI</span><span class="ai-text">${text}</span>`;
+btn.title=text;
+});
+}
+function setAIButtonsLoading(){
+[1,2,3,4].forEach(i=>{
+const btn=document.getElementById(`btn-a${i}`);
+btn.classList.add('loading-action');btn.classList.remove('selected');
+btn.innerHTML=`<span class="ai-tag">AI</span><span class="ai-text">Thinking...</span>`;
+});
+}
+
+// SCENE IMAGE
+function drawCanvasScene(prompt){
+const svgWrap=document.getElementById('scene-svg-wrap');
+const imgLoading=document.getElementById('image-loading');
+const canvas=document.createElement('canvas');
+canvas.width=1280;canvas.height=560;canvas.style.cssText='width:100%;height:100%;display:block';
+const ctx=canvas.getContext('2d');const p=prompt.toLowerCase();
+let c1,c2,c3,c4;
+if(p.includes('fire')||p.includes('apocalyptic')||p.includes('burn')){c1='#1a0500';c2='#3d1200';c3='#7a2800';c4='#c45000';}
+else if(p.includes('space')||p.includes('star')||p.includes('cosmos')){c1='#00010f';c2='#050520';c3='#0a0a40';c4='#1a1060';}
+else if(p.includes('forest')||p.includes('nature')||p.includes('green')){c1='#010a03';c2='#031a08';c3='#063312';c4='#0a4d1c';}
+else if(p.includes('ocean')||p.includes('sea')||p.includes('water')){c1='#000d1a';c2='#001a33';c3='#002b4d';c4='#003d66';}
+else if(p.includes('snow')||p.includes('ice')||p.includes('winter')){c1='#050a14';c2='#0d1a2e';c3='#1a2d4a';c4='#2a4060';}
+else if(p.includes('dark')||p.includes('shadow')||p.includes('noir')){c1='#050508';c2='#0d0d14';c3='#14141f';c4='#1e1e2e';}
+else{c1='#080510';c2='#12101e';c3='#1e1830';c4='#2a2040';}
+const sky=ctx.createLinearGradient(0,0,0,380);sky.addColorStop(0,c1);sky.addColorStop(0.5,c2);sky.addColorStop(0.8,c3);sky.addColorStop(1,c4);
+ctx.fillStyle=sky;ctx.fillRect(0,0,1280,560);
+const glow=ctx.createRadialGradient(640,200,20,640,200,500);glow.addColorStop(0,'rgba(201,168,76,0.12)');glow.addColorStop(0.4,'rgba(150,80,20,0.06)');glow.addColorStop(1,'rgba(0,0,0,0)');
+ctx.fillStyle=glow;ctx.fillRect(0,0,1280,560);
+for(let i=0;i<4;i++){const fog=ctx.createLinearGradient(0,300+i*30,0,420+i*20);fog.addColorStop(0,'rgba(0,0,0,0)');fog.addColorStop(0.5,`rgba(201,168,76,${0.03-i*0.005})`);fog.addColorStop(1,'rgba(0,0,0,0)');ctx.fillStyle=fog;ctx.fillRect(0,300+i*30,1280,90);}
+ctx.fillStyle='rgba(0,0,0,0.85)';ctx.beginPath();ctx.moveTo(0,560);
+[[0,420],[80,340],[160,390],[260,310],[350,360],[440,295],[520,330],[600,280],[680,320],[760,270],[850,310],[940,260],[1020,300],[1100,270],[1180,310],[1280,350],[1280,560]].forEach(([x,y])=>ctx.lineTo(x,y));
+ctx.closePath();ctx.fill();
+const ground=ctx.createLinearGradient(0,440,0,560);ground.addColorStop(0,'rgba(0,0,0,0.9)');ground.addColorStop(1,'#000000');ctx.fillStyle=ground;ctx.fillRect(0,460,1280,100);
+if(!p.includes('day')&&!p.includes('sun')){ctx.fillStyle='rgba(255,255,220,0.6)';const seed=prompt.split('').reduce((a,c)=>a+c.charCodeAt(0),0);const rng=n=>((seed*9301+n*49297+233)%233280)/233280;for(let i=0;i<80;i++){ctx.beginPath();ctx.arc(rng(i*3)*1280,rng(i*3+1)*250,rng(i*3+2)*1.2,0,Math.PI*2);ctx.fill();}}
+const vig=ctx.createRadialGradient(640,280,100,640,280,720);vig.addColorStop(0,'rgba(0,0,0,0)');vig.addColorStop(1,'rgba(0,0,0,0.75)');ctx.fillStyle=vig;ctx.fillRect(0,0,1280,560);
+imgLoading.style.display='none';svgWrap.innerHTML='';svgWrap.appendChild(canvas);
+}
+
+async function loadSceneImage(prompt,turnNum){
+const wrap=document.getElementById('scene-image-wrap');
+const svgWrap=document.getElementById('scene-svg-wrap');
+const imgLoading=document.getElementById('image-loading');
+wrap.style.display='block';imgLoading.style.display='flex';imgLoading.textContent='Painting the scene...';svgWrap.innerHTML='';
+const h=prompt.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+const seed=(turnNum*31337+h)%99999;
+const url=`https://image.pollinations.ai/prompt/${encodeURIComponent(prompt+', cinematic, atmospheric, dramatic lighting, highly detailed, painterly')}?model=flux-schnell&width=1280&height=560&seed=${seed}&nologo=true&nofeed=true`;
+const img=document.createElement('img');img.style.cssText='width:100%;height:100%;object-fit:cover;display:block;opacity:0;transition:opacity 0.6s ease';
+let done=false;const fallback=()=>{if(done)return;done=true;drawCanvasScene(prompt);};
+const timer=setTimeout(fallback,18000);
+img.onload=()=>{if(done)return;done=true;clearTimeout(timer);imgLoading.style.display='none';svgWrap.innerHTML='';svgWrap.appendChild(img);requestAnimationFrame(()=>{img.style.opacity='1';});};
+img.onerror=()=>{clearTimeout(timer);fallback();};img.src=url;
+}
+
+// FORMATTING
+function formatValue(val){
+if(val===null||val===undefined)return'';if(typeof val==='string')return val;if(typeof val==='number')return val.toString();
+if(Array.isArray(val))return val.map(i=>formatValue(i)).join(', ');
+if(typeof val==='object')return Object.entries(val).map(([k,v])=>`${k.charAt(0).toUpperCase()+k.slice(1).replace(/_/g,' ')}: ${formatValue(v)}`).join('<br>');
+return String(val);
+}
+function normalizeRelation(rel){
+if(!rel)return'unknown';const r=rel.toLowerCase().trim();
+if(r.includes('ally')||r.includes('allies')||r.includes('friend')||r.includes('loyal'))return'ally';
+if(r.includes('hostile')||r.includes('enemy')||r.includes('foe')||r.includes('threat'))return'hostile';
+if(r.includes('neutral')||r.includes('passive')||r.includes('stranger'))return'neutral';
+if(r.includes('dead')||r.includes('deceased')||r.includes('killed')||r.includes('slain'))return'dead';
+return'unknown';
+}
+
+// RENDER PLAYER
+function renderPlayerPanel(ps){
+if(!ps)return;Object.assign(playerState,ps);
+const body=document.getElementById('player-stats-body');
+const rows=[];
+if(ps.hp)rows.push(['HP',formatValue(ps.hp),'hp']);
+if(ps.status)rows.push(['Status',formatValue(ps.status),ps.status.toLowerCase().includes('healthy')?'':'status-bad']);
+if(ps.location)rows.push(['Location',formatValue(ps.location),'']);
+if(ps.gold!==undefined&&ps.gold!=='N/A'&&ps.gold!==null){
+const g=parseInt(ps.gold);if(!isNaN(g)&&g>0)totalGoldEarned=Math.max(totalGoldEarned,g);
+rows.push(['Gold',formatValue(ps.gold),'']);
+}
+if(ps.xp)rows.push(['XP',formatValue(ps.xp),'']);
+if(ps.reputation){rows.push(['Reputation',formatValue(ps.reputation),'']);reputation=ps.reputation;}
+if(ps.personality){rows.push(['Nature',formatValue(ps.personality),'']);personality=ps.personality;}
+body.innerHTML=rows.map(([k,v,cls])=>`<div class="stat-row"><span class="stat-key">${k}</span><span class="stat-val ${cls}">${v}</span></div>`).join('');
+}
+
+// RENDER WORLD
+function renderWorldPanel(ws){
+if(!ws)return;
+const body=document.getElementById('world-body');const rows=[];
+if(ws.time)rows.push(['Time',formatValue(ws.time)]);
+if(ws.weather)rows.push(['Weather',formatValue(ws.weather)]);
+if(ws.environment)rows.push(['Scene',formatValue(ws.environment)]);
+if(ws.faction_tension)rows.push(['Tension',formatValue(ws.faction_tension)]);
+if(ws.world_age){worldAge=ws.world_age;rows.push(['Age',formatValue(ws.world_age)]);
+const badge=document.getElementById('world-age-badge');badge.textContent=ws.world_age;badge.style.display='inline-block';}
+body.innerHTML=rows.map(([k,v])=>`<div class="stat-row"><span class="stat-key">${k}</span><span class="stat-val">${v}</span></div>`).join('');
+}
+
+// RENDER FACTIONS
+function renderFactions(f){
+if(!f||Object.keys(f).length===0){document.getElementById('faction-body').innerHTML='';document.getElementById('faction-count').textContent='';return;}
+factions=f;document.getElementById('faction-count').textContent=Object.keys(f).length;
+const body=document.getElementById('faction-body');
+body.innerHTML=Object.entries(f).map(([name,val])=>{
+const pct=Math.max(0,Math.min(100,(val+100)/2));
+const color=val>=50?'var(--green)':val>=0?'var(--gold)':val>=-50?'var(--red)':'#8b0000';
+return`<div class="faction-row"><span class="faction-name">${name}</span><div class="faction-bar-wrap"><div class="faction-bar" style="width:${pct}%;background:${color}"></div></div><span class="faction-val">${val}</span></div>`;
+}).join('');
+}
+
+// RENDER INVENTORY (tab version)
+function renderInventory(changes){
+if(changes){
+(changes.added||[]).forEach(item=>{if(item&&!inventory.includes(item))inventory.push(item);});
+(changes.removed||[]).forEach(item=>{inventory=inventory.filter(i=>i!==item);});
+(changes.equipped||[]).forEach(item=>{
+const idx=inventory.indexOf(item);if(idx===-1)inventory.push(item);
+});
+}
+const grid=document.getElementById('inv-grid');
+const empty=document.getElementById('inv-empty');
+const count=document.getElementById('inv-count');
+count.textContent=inventory.length>0?`(${inventory.length})`:'';
+if(inventory.length===0){grid.innerHTML='';empty.style.display='block';return;}
+empty.style.display='none';
+grid.innerHTML=inventory.map((item,i)=>{
+const isEquipped=changes?.equipped?.includes(item);
+return`<span class="inv-item${isEquipped?' equipped':''}" onclick="openItemModal(${i})">${item}</span>`;
+}).join('');
+}
+
+// ITEM MODAL
+function openItemModal(idx){
+selectedItemIdx=idx;const item=inventory[idx];if(!item)return;
+document.getElementById('modal-item-name').textContent=item;
+document.getElementById('modal-item-desc').innerHTML=`<strong>${item}</strong><br><br>A ${item.toLowerCase()} carried in your inventory.`;
+const eqBtn=document.getElementById('modal-equip-btn');
+eqBtn.textContent='Equip';
+document.getElementById('item-modal').classList.add('show');
+if(navigator.vibrate)navigator.vibrate(10);
+}
+function closeModal(){document.getElementById('item-modal').classList.remove('show');selectedItemIdx=-1;}
+function equipItem(){closeModal();}
+function dropItem(){
+if(selectedItemIdx>=0){inventory.splice(selectedItemIdx,1);renderInventory(null);}
+closeModal();
+}
+document.getElementById('item-modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+// RENDER NPCs (with memory)
+function renderNPCs(npcs){
+const list=document.getElementById('npc-list');
+const empty=document.getElementById('npc-empty');
+const count=document.getElementById('npc-count');
+if(!npcs||!npcs.length){list.innerHTML='';empty.style.display='block';count.textContent='';return;}
+empty.style.display='none';count.textContent=`(${npcs.length})`;
+npcRegistry={};npcs.forEach(npc=>{if(npc.name)npcRegistry[npc.name]={relation:npc.relation||'unknown',note:npc.note||'',trust:npc.trust??50,memory:npc.memory||[]};});
+npcsMet=Math.max(npcsMet,Object.keys(npcRegistry).length);
+list.innerHTML=Object.entries(npcRegistry).map(([name,data])=>{
+const rel=normalizeRelation(data.relation);
+const trust=data.trust??50;
+const trustColor=trust>=70?'var(--green)':trust>=40?'var(--gold)':'var(--red)';
+return`<div class="npc-item" onclick="this.classList.toggle('open')">
+<div class="npc-header"><span class="npc-dot ${rel}"></span><span class="npc-name">${name}</span><span class="npc-status">${data.note||''}</span></div>
+<div class="npc-trust-bar"><div class="npc-trust-fill" style="width:${trust}%;background:${trustColor}"></div></div>
+<div class="npc-memory"><div class="npc-memory-inner">
+<div style="font-size:10px;color:var(--text-muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px">Trust: ${trust}/100</div>
+${data.memory.length?data.memory.map(m=>`<div class="npc-memory-item">&bull; ${m}</div>`).join(''):'<div class="npc-memory-item" style="opacity:0.5">No memories yet...</div>'}
+</div></div></div>`;
+}).join('');
+}
+
+// RENDER REALM (settlement management)
+function renderRealmPanel(realm){
+const body=document.getElementById('realm-body');
+const empty=document.getElementById('realm-empty');
+if(!realm||!realm.name){body.innerHTML='';empty.style.display='block';currentRealmState=null;return;}
+empty.style.display='none';currentRealmState=realm;
+const rows=[];
+rows.push(['Type',realm.type||'Settlement']);
+if(realm.population)rows.push(['Population',formatValue(realm.population)]);
+if(realm.economy)rows.push(['Economy',formatValue(realm.economy)]);
+if(realm.military)rows.push(['Military',formatValue(realm.military)]);
+if(realm.food!==undefined)rows.push(['Food Supply',`${realm.food}/100`]);
+if(realm.happiness!==undefined)rows.push(['Happiness',`${realm.happiness}/100`]);
+if(realm.geopolitics)rows.push(['Geopolitics',formatValue(realm.geopolitics)]);
+if(realm.relationship)rows.push(['Relationships',formatValue(realm.relationship)]);
+body.innerHTML=`<div style="font-family:var(--font-display);font-size:11px;color:var(--gold);letter-spacing:0.1em;margin-bottom:8px">${realm.name}</div>`+rows.map(([k,v])=>`<div class="stat-row"><span class="stat-key">${k}</span><span class="stat-val">${v}</span></div>`).join('');
+}
+
+// RENDER LOCATIONS
+function renderLocations(){
+const body=document.getElementById('loc-body');
+const count=document.getElementById('loc-count');
+count.textContent=locationHistory.length;
+if(!locationHistory.length){body.innerHTML='<div style="font-size:12px;color:var(--text-muted);font-style:italic">No locations discovered yet.</div>';return;}
+body.innerHTML=`<div class="loc-list">${locationHistory.map((loc,i)=>{
+const isCurrent=i===locationHistory.length-1;
+return`<div class="loc-item${isCurrent?' loc-current':''}"><span class="loc-dot"></span>${loc}</div>`;
+}).join('')}</div>`;
+}
+
+// RENDER TITLES
+function renderTitles(){
+const body=document.getElementById('titles-body');
+if(!titles.length){body.innerHTML='<div style="font-size:12px;color:var(--text-muted);font-style:italic">No titles earned yet.</div>';return;}
+body.innerHTML=titles.map(t=>`<span class="title-tag">${t}</span>`).join('');
+}
+
+// RENDER RUMORS
+function renderRumors(r){
+const c=document.getElementById('rumors-container');
+if(!r||!r.length){c.innerHTML='';return;}
+c.innerHTML=r.map(rumor=>`<div class="rumor-box"><div class="rumor-label">Rumor</div><div class="rumor-text">${rumor}</div></div>`).join('');
+}
+
+// RENDER SCENE
+function renderScene(parsed){
+const divHtml=`<hr style="border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.3),transparent);margin:20px 0;display:block">`;
+document.getElementById('narrative').innerHTML=(parsed.narrative||'').replace(/---/g,divHtml).replace(/\n/g,'<br>');
+if(parsed.player_state)renderPlayerPanel(parsed.player_state);
+if(parsed.world_state)renderWorldPanel(parsed.world_state);
+if(parsed.factions)renderFactions(parsed.factions);
+renderInventory(parsed.inventory_changes||null);
+if(parsed.npcs)renderNPCs(parsed.npcs);
+renderRealmPanel(parsed.realm_state||null);
+renderLocations();renderTitles();renderRumors(parsed.rumors);
+if(parsed.titles){titles=[...new Set([...titles,...parsed.titles])];renderTitles();}
+if(parsed.location_discovered&&!locationHistory.includes(parsed.location_discovered)){locationHistory.push(parsed.location_discovered);locationsVisited=locationHistory.length;renderLocations();}
+if(parsed.major_events)majorEvents=[...majorEvents,...(Array.isArray(parsed.major_events)?parsed.major_events:[])];
+if(parsed.visual_prompt){const vs=document.getElementById('visual-strip');vs.textContent=parsed.visual_prompt;vs.style.display='block';loadSceneImage(parsed.visual_prompt,turn);}
+if(parsed.suggested_actions)setAIButtons(parsed.suggested_actions);
+if(parsed.world_age){worldAge=parsed.world_age;const badge=document.getElementById('world-age-badge');badge.textContent=worldAge;badge.style.display='inline-block';}
+// auto-save
+try{saveGame();}catch(e){}
+// check game over
+if(parsed.game_over)showEndScreen(parsed);
+}
+
+function getSelectedActions(){
+const actions=[];
+[1,2,3,4].forEach(i=>{const btn=document.getElementById(`btn-a${i}`);if(btn.classList.contains('selected')){const t=btn.querySelector('.ai-text')?.textContent;if(t&&t!=='Thinking...')actions.push(t);}});
+const c=document.getElementById('a5').value.trim();if(c)actions.push(c);return actions;
+}
+
+// BEGIN
+document.getElementById('begin-btn').addEventListener('click',async()=>{
+const errEl=document.getElementById('err-intro');
+let activeGenre=genre;
+if(genre==='custom'){const ct=document.getElementById('custom-input').value.trim();if(!ct){errEl.style.display='block';errEl.textContent='Please describe your custom world.';return;}activeGenre=ct;}
+errEl.style.display='none';
+const btn=document.getElementById('begin-btn');btn.disabled=true;btn.style.display='none';
+const loadingEl=document.getElementById('intro-loading');loadingEl.style.display='flex';
+const msgs=['The gates stir...','Ancient magic awakens...','Worlds take shape...','Characters emerge...','The story breathes...'];
+let mi=0;const gte=document.getElementById('gate-text');
+const iv=setInterval(()=>{mi=(mi+1)%msgs.length;gte.textContent=msgs[mi];},1800);
+const initMsg=`Ready to begin. Genre/World: ${activeGenre}.
+Set an exciting opening scene. Establish who I am, where I am, and one immediate dramatic situation.
+If the setting implies a camp, settlement, noble house, fortress, nation, or kingdom I govern/reside in, define a starting realm_state with population, economy, military, food, happiness.
+Introduce 1-2 NPCs with trust and memory.
+Give me a starting inventory of 2-3 items.
+Provide 2-3 starting factions with reputation scores.
+Give me 1 starting title appropriate to the setting.
+Provide 4 suggested first actions. visual_prompt must be UNIQUE to this opening scene.`;
+history=[{role:'user',content:initMsg}];
+try{
+const raw=await callStory(history,STORY_SYSTEM);const parsed=parse(raw);
+history.push({role:'assistant',content:raw});clearInterval(iv);
+document.getElementById('intro').style.display='none';document.getElementById('game').style.display='block';
+document.getElementById('save-btn').style.display='inline-block';
+turn=1;genreLabel=genre==='custom'?'Custom World':activeGenre;
+document.getElementById('turn-label').textContent=`Turn ${turn}`;
+initTabs();renderScene(parsed);
+document.getElementById('a5').focus();window.scrollTo({top:0,behavior:'smooth'});
+}catch(e){clearInterval(iv);loadingEl.style.display='none';btn.style.display='';btn.disabled=false;errEl.style.display='block';errEl.textContent='Failed to start: '+e.message;}
+});
+
+// SUBMIT
+async function submitActions(){
+const actions=getSelectedActions();
+if(!actions.length){const e=document.getElementById('err-game');e.style.display='block';e.textContent='Select at least one action or write your own in field 5.';setTimeout(()=>e.style.display='none',3000);return;}
+document.getElementById('err-game').style.display='none';document.getElementById('loading').style.display='block';
+document.getElementById('submit-btn').disabled=true;document.getElementById('narrative').style.opacity='0.5';
+setAIButtonsLoading();
+const sc=inventory.length?`\n[Inventory: ${inventory.join(', ')}]`:'';
+const nc=Object.keys(npcRegistry).length?`\n[NPCs: ${Object.entries(npcRegistry).map(([n,d])=>`${n}(${d.relation},trust:${d.trust})`).join(', ')}]`:'';
+const rc=currentRealmState?`\n[Realm(${currentRealmState.name}): pop:${currentRealmState.population||'?'},econ:${currentRealmState.economy||'?'},mil:${currentRealmState.military||'?'},food:${currentRealmState.food||'?'},happy:${currentRealmState.happiness||'?'}]`:'';
+const fc=Object.keys(factions).length?`\n[Factions: ${Object.entries(factions).map(([n,v])=>`${n}:${v}`).join(', ')}]`:'';
+const lc=locationHistory.length?`\n[Visited: ${locationHistory.join(', ')}]`:'';
+const content=`My actions this turn:\n${actions.map((a,i)=>`${i+1}. ${a}`).join('\n')}\n[World Age: ${worldAge}] [Reputation: ${reputation}] [Personality: ${personality}]${sc}${nc}${rc}${fc}${lc}`;
+history.push({role:'user',content});
+try{
+const raw=await callStory(history,STORY_SYSTEM);const parsed=parse(raw);
+history.push({role:'assistant',content:raw});
+document.getElementById('a5').value='';[1,2,3,4].forEach(i=>document.getElementById(`btn-a${i}`).classList.remove('selected'));
+turn++;document.getElementById('turn-label').textContent=`Turn ${turn}`;
+renderScene(parsed);
+setTimeout(()=>{document.getElementById('game').scrollIntoView({behavior:'smooth',block:'start'});},80);
+document.getElementById('a5').focus();
+}catch(e){
+document.getElementById('err-game').style.display='block';document.getElementById('err-game').textContent='Error: '+e.message;
+history.pop();setAIButtons([]);
+}
+document.getElementById('narrative').style.opacity='1';document.getElementById('loading').style.display='none';
+document.getElementById('submit-btn').disabled=false;
+}
+document.getElementById('submit-btn').addEventListener('click',submitActions);
+document.getElementById('a5').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();submitActions();}});
+
+// END SCREEN
+function showEndScreen(parsed){
+const end=document.getElementById('end-screen');end.style.display='block';
+document.getElementById('end-title').textContent=parsed.game_over===true?'Your Tale Ends':'The Story Concludes';
+document.getElementById('end-subtitle').textContent=parsed.end_summary||'The world remembers you.';
+const grid=document.getElementById('end-stats-grid');
+const stats=[
+['Turns Survived',turn],['Gold Earned',totalGoldEarned],['NPCs Met',npcsMet],
+['Locations Visited',locationsVisited],['Events Witnessed',majorEvents.length],['Current Reputation',reputation],
+['Title',titles.length?titles[titles.length-1]:'None'],['World Age',worldAge]
+];
+grid.innerHTML=stats.map(([k,v])=>`<div class="end-stat"><div class="end-stat-val">${v}</div><div class="end-stat-key">${k}</div></div>`).join('');
+const tDiv=document.getElementById('end-titles');
+if(titles.length){tDiv.innerHTML=`<div class="section-label" style="margin-bottom:8px">Titles Earned</div>${titles.map(t=>`<span class="title-tag">${t}</span>`).join('')}`;}
+}
+
+// SAVE/LOAD
+function checkSavedGame(){try{const s=localStorage.getItem(SAVE_KEY);document.getElementById('load-btn').style.display=s?'inline-block':'none';}catch(e){}}
+function saveGame(){
+if(!history||!history.length)return;
+try{localStorage.setItem(SAVE_KEY,JSON.stringify({history,playerState,inventory,npcRegistry,currentRealmState,genre,genreLabel,turn,factions,titles,locationHistory,majorEvents,worldAge,personality,reputation,totalGoldEarned,npcsMet,locationsVisited}));
+const b=document.getElementById('save-btn');b.textContent='Saved';b.style.color='var(--green)';b.style.borderColor='var(--green-dim)';
+setTimeout(()=>{b.textContent='Save';b.style.color='';b.style.borderColor='';},2000);checkSavedGame();
+}catch(e){}
+}
+function loadGame(){
+try{const raw=localStorage.getItem(SAVE_KEY);if(!raw)return;const d=JSON.parse(raw);
+history=d.history||[];playerState=d.playerState||{};inventory=d.inventory||[];npcRegistry=d.npcRegistry||{};
+currentRealmState=d.currentRealmState||null;genre=d.genre||'dark fantasy';genreLabel=d.genreLabel||'dark fantasy';turn=d.turn||0;
+factions=d.factions||{};titles=d.titles||[];locationHistory=d.locationHistory||[];majorEvents=d.majorEvents||[];
+worldAge=d.worldAge||'Year 1';personality=d.personality||'Neutral';reputation=d.reputation||'Unknown';
+totalGoldEarned=d.totalGoldEarned||0;npcsMet=d.npcsMet||0;locationsVisited=d.locationsVisited||locationHistory.length;
+document.getElementById('intro').style.display='none';document.getElementById('game').style.display='block';
+document.getElementById('save-btn').style.display='inline-block';
+document.getElementById('turn-label').textContent=`Turn ${turn}`;
+initTabs();
+if(history.length){const last=history[history.length-1];if(last?.role==='assistant'){renderScene(parse(last.content));}}
+const lb=document.getElementById('load-btn');lb.textContent='Loaded';lb.style.color='var(--green)';lb.style.borderColor='var(--green-dim)';
+setTimeout(()=>{lb.textContent='Load';lb.style.color='';lb.style.borderColor='';},2000);
+setTimeout(()=>{const a5=document.getElementById('a5');if(a5)a5.focus();},150);
+window.scrollTo({top:0,behavior:'smooth'});
+}catch(e){const errEl=document.getElementById('err-game');if(errEl){errEl.style.display='block';errEl.textContent='Failed to load: '+e.message;}}
+}
+document.getElementById('save-btn').addEventListener('click',saveGame);
+document.getElementById('load-btn').addEventListener('click',loadGame);
+checkSavedGame();
+if(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1'){if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').then(()=>console.log('SW registered')).catch(()=>{});}
+</script>
+</body>
+</html>
