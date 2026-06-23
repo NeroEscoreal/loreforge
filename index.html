@@ -18,6 +18,11 @@ header{width:100%;max-width:760px;padding:1.75rem 1.25rem 0.5rem;display:flex;al
 .header-btn{background:var(--surface);border:0.5px solid var(--border);border-radius:var(--radius);padding:5px 9px;font-size:10px;color:var(--text-muted);font-family:var(--font-display);letter-spacing:0.08em;text-transform:uppercase;cursor:pointer;display:none;line-height:1;transition:all 0.2s}
 .header-btn:hover{border-color:var(--gold-dim);color:var(--text-dim)}
 header{width:100%;max-width:760px;padding:1.75rem 1.25rem 0.5rem;display:flex;align-items:center;justify-content:space-between}
+.offline-bar{display:none;width:100%;background:rgba(201,168,76,0.12);border-bottom:0.5px solid rgba(201,168,76,0.2);padding:6px 12px;text-align:center;font-family:var(--font-display);font-size:10px;letter-spacing:0.12em;text-transform:uppercase;color:var(--gold)}
+.offline-bar.show{display:block}
+.free-write-toggle{display:flex;align-items:center;gap:6px;margin-top:6px;margin-bottom:2px}
+.free-write-toggle label{font-family:var(--font-display);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-muted);cursor:pointer}
+.free-write-toggle input[type=checkbox]{accent-color:var(--gold);cursor:pointer}
 main{width:100%;max-width:760px;padding:0 1.25rem 5rem;flex:1}
 #intro{display:flex;flex-direction:column;align-items:center;padding-top:2.5rem;text-align:center}
 .ornament{font-size:22px;color:var(--gold-dim);letter-spacing:0.6em;margin-bottom:1.25rem;opacity:0.7}
@@ -175,6 +180,7 @@ h1{font-family:var(--font-display);font-size:clamp(24px,6vw,36px);font-weight:no
 <span class="turn-badge" id="turn-label"></span>
 </div>
 </header>
+<div class="offline-bar" id="offline-bar">Offline Mode &mdash; AI features unavailable. Use free-write to keep playing.</div>
 <main>
 <div id="intro">
 <div class="ornament">&#10022; &#10022; &#10022;</div>
@@ -271,7 +277,49 @@ h1{font-family:var(--font-display);font-size:clamp(24px,6vw,36px);font-weight:no
 </div>
 <!-- REALM TAB -->
 <div class="tab-panel" id="tab-realm">
-<div id="realm-body"></div>
+<div id="realm-name-label" style="font-family:var(--font-display);font-size:11px;color:var(--gold);letter-spacing:0.1em;margin-bottom:8px;display:none"></div>
+<div class="collapsible" id="col-r-pop">
+<div class="collapsible-header" onclick="toggleCollapsible('col-r-pop')">
+<span class="collapsible-arrow">&#9654;</span>
+<span class="collapsible-title">Population</span>
+</div>
+<div class="collapsible-body"><div class="collapsible-inner" id="realm-pop-body"></div></div>
+</div>
+<div class="collapsible" id="col-r-econ">
+<div class="collapsible-header" onclick="toggleCollapsible('col-r-econ')">
+<span class="collapsible-arrow">&#9654;</span>
+<span class="collapsible-title">Economy</span>
+</div>
+<div class="collapsible-body"><div class="collapsible-inner" id="realm-econ-body"></div></div>
+</div>
+<div class="collapsible" id="col-r-mil">
+<div class="collapsible-header" onclick="toggleCollapsible('col-r-mil')">
+<span class="collapsible-arrow">&#9654;</span>
+<span class="collapsible-title">Military</span>
+</div>
+<div class="collapsible-body"><div class="collapsible-inner" id="realm-mil-body"></div></div>
+</div>
+<div class="collapsible" id="col-r-geo">
+<div class="collapsible-header" onclick="toggleCollapsible('col-r-geo')">
+<span class="collapsible-arrow">&#9654;</span>
+<span class="collapsible-title">Geopolitics</span>
+</div>
+<div class="collapsible-body"><div class="collapsible-inner" id="realm-geo-body"></div></div>
+</div>
+<div class="collapsible" id="col-r-rel">
+<div class="collapsible-header" onclick="toggleCollapsible('col-r-rel')">
+<span class="collapsible-arrow">&#9654;</span>
+<span class="collapsible-title">Relationships</span>
+</div>
+<div class="collapsible-body"><div class="collapsible-inner" id="realm-rel-body"></div></div>
+</div>
+<div class="collapsible open" id="col-r-overview">
+<div class="collapsible-header" onclick="toggleCollapsible('col-r-overview')">
+<span class="collapsible-arrow">&#9654;</span>
+<span class="collapsible-title">Overview</span>
+</div>
+<div class="collapsible-body"><div class="collapsible-inner" id="realm-overview-body"></div></div>
+</div>
 <p class="inv-empty" id="realm-empty">No settlement under your control.</p>
 </div>
 </div>
@@ -280,6 +328,7 @@ h1{font-family:var(--font-display);font-size:clamp(24px,6vw,36px);font-weight:no
 <div id="loading"><span>The world responds to your actions...</span></div>
 <div class="divider"></div>
 <span class="section-label">Choose an Action or Write Your Own</span>
+<div class="free-write-toggle"><input type="checkbox" id="free-write-cb"><label for="free-write-cb">Free-write mode (skip AI, write your own narrative)</label></div>
 <p class="actions-note">Click a suggested action to select it &mdash; or type your own in action 5.</p>
 <div class="actions-list">
 <div class="action-row"><span class="action-num">1</span><button class="ai-action-btn loading-action" id="btn-a1"><span class="ai-tag">AI</span><span class="ai-text">Waiting...</span></button></div>
@@ -327,7 +376,7 @@ Rules:
 5. The world is ALIVE: introduce NPCs organically, have them react, remember history, let them grow or die. Always track at least 1-3 active characters.
 6. Never control the player character. Only describe world responses.
 7. After the narrative, always suggest exactly 4 possible next actions.
-8. If the player governs/resides in a settlement, populate 'realm_state' with population, economy, military, food, happiness.
+8. If the player governs/resides in a settlement, populate 'realm_state' with detailed nested objects: population (with total, workers, farmers, merchants, craftsfolk, idle, etc.), economy (with agriculture, trade, mining, industry, treasury, taxation, status like "Weak|Moderate|Strong|Booming" for each — industry covers crafts, blacksmithing, weaving, woodworking, alchemy, and any manufactured goods), military (with soldiers, cavalry, archers, siege, navy, fortifications, training, morale), geopolitics (array of objects with name, status, tension like {"name":"Northern Kingdom","status":"Ally","tension":"Low"}), and relationships (array of objects with name, relation, standing, notes like {"name":"Merchant Guild","relation":"Friendly","standing":"Trusted","notes":"Supply food stores"}). Also include food and happiness as 0-100 numbers.
 9. Keep 'npcs' array as the DEFINITIVE current list. Each NPC must have: name, relation (ally|neutral|hostile|dead|unknown), note, trust (0-100 integer), memory (array of 1-3 short strings remembering key interactions with the player).
 10. Ensure 'narrative' separates descriptions from dialogue using a single --- line.
 11. Keep all state objects simple human-readable strings except trust (number) and memory (string array).
@@ -349,7 +398,7 @@ IMPORTANT - Respond ONLY with valid JSON:
   "world_state":{"time":"<Dusk>","weather":"<Stormy>","environment":"<brief note>","faction_tension":"<brief note or omit>","world_age":"<Year 1>"},
   "factions":{"<Faction Name>":<reputation -100 to 100>},
   "npcs":[{"name":"<name>","relation":"ally|neutral|hostile|dead|unknown","note":"<status>","trust":<0-100>,"memory":["<event 1>","<event 2>"]}],
-  "realm_state":{"name":"<name>","type":"<Outpost|Kingdom|etc>","population":<number>,"economy":"<Treasury: X Gold, GDP: Stable>","military":"<Defenders: Moderate>","food":<0-100>,"happiness":<0-100>,"geopolitics":"<brief>","relationship":"<brief>"},
+  "realm_state":{"name":"<name>","type":"<Outpost|Kingdom|etc>","population":{"total":<number>,"workers":<number>,"farmers":<number>,"merchants":<number>,"craftsfolk":<number>,"idle":<number>,"notes":"<brief>"},"economy":{"agriculture":"<Weak|Moderate|Strong>: <brief>","trade":"<Weak|Moderate|Strong>: <brief>","mining":"<Weak|Moderate|Strong>: <brief>","industry":"<Weak|Moderate|Strong>: <brief — crafts, smithing, weaving, alchemy, manufactured goods>","treasury":"<amount>","taxation":"<Low|Moderate|High>","status":"<overall status>"},"military":{"soldiers":<number>,"cavalry":<number>,"archers":<number>,"siege":<number>,"navy":<number>,"fortifications":"<None|Basic|Strong|Impenetrable>","training":"<Raw|Moderate|Veteran|Elite>","morale":"<Low|Steady|High|Fanatical>"},"food":<0-100>,"happiness":<0-100>,"geopolitics":[{"name":"<faction/neighbor>","status":"<Ally|Neutral|Rival|Enemy>","tension":"<Low|Moderate|High|Critical>","notes":"<brief>"}],"relationships":[{"name":"<faction/leader/group>","relation":"<Friendly|Hostile|Neutral|Wary>","standing":"<Trusted|Known|Unknown|Distrusted>","notes":"<brief>"}]}
   "titles":["<earned title>"],
   "location_discovered":"<new location name or null>",
   "major_events":["<event>"],
@@ -360,7 +409,7 @@ IMPORTANT - Respond ONLY with valid JSON:
   "end_summary":"<epitaph if game_over true, else omit>"
 }`;
 
-let apiKey='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';
+let apiKey='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';
 let genre='dark fantasy',genreLabel='dark fantasy',history=[],turn=0;
 let playerState={},inventory=[],npcRegistry={},currentRealmState=null;
 let factions={},titles=[],locationHistory=[],majorEvents=[],rumors=[];
@@ -621,20 +670,59 @@ ${data.memory.length?data.memory.map(m=>`<div class="npc-memory-item">&bull; ${m
 
 // RENDER REALM (settlement management)
 function renderRealmPanel(realm){
-const body=document.getElementById('realm-body');
 const empty=document.getElementById('realm-empty');
-if(!realm||!realm.name){body.innerHTML='';empty.style.display='block';currentRealmState=null;return;}
+if(!realm||!realm.name){empty.style.display='block';
+['realm-pop-body','realm-econ-body','realm-mil-body','realm-geo-body','realm-rel-body','realm-overview-body'].forEach(id=>document.getElementById(id).innerHTML='');
+document.getElementById('realm-name-label').style.display='none';
+currentRealmState=null;return;}
 empty.style.display='none';currentRealmState=realm;
-const rows=[];
-rows.push(['Type',realm.type||'Settlement']);
-if(realm.population)rows.push(['Population',formatValue(realm.population)]);
-if(realm.economy)rows.push(['Economy',formatValue(realm.economy)]);
-if(realm.military)rows.push(['Military',formatValue(realm.military)]);
-if(realm.food!==undefined)rows.push(['Food Supply',`${realm.food}/100`]);
-if(realm.happiness!==undefined)rows.push(['Happiness',`${realm.happiness}/100`]);
-if(realm.geopolitics)rows.push(['Geopolitics',formatValue(realm.geopolitics)]);
-if(realm.relationship)rows.push(['Relationships',formatValue(realm.relationship)]);
-body.innerHTML=`<div style="font-family:var(--font-display);font-size:11px;color:var(--gold);letter-spacing:0.1em;margin-bottom:8px">${realm.name}</div>`+rows.map(([k,v])=>`<div class="stat-row"><span class="stat-key">${k}</span><span class="stat-val">${v}</span></div>`).join('');
+document.getElementById('realm-name-label').textContent=realm.name;
+document.getElementById('realm-name-label').style.display='block';
+
+function renderObj(obj,id){
+const el=document.getElementById(id);
+if(!obj||Object.keys(obj).length===0){el.innerHTML='<div style="font-size:12px;color:var(--text-muted);font-style:italic">None recorded.</div>';return;}
+el.innerHTML=Object.entries(obj).map(([k,v])=>{
+const label=k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+if(typeof v==='object'&&v!==null&&!Array.isArray(v)){
+const sub=Object.entries(v).map(([sk,sv])=>{
+const sl=sk.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+return`<div class="stat-row" style="padding-left:10px;border-left:1px solid var(--border);margin-left:4px"><span class="stat-key" style="font-size:11px">${sl}</span><span class="stat-val" style="font-size:12px">${formatValue(sv)}</span></div>`;
+}).join('');
+return`<div style="margin-bottom:8px"><div style="font-family:var(--font-display);font-size:10px;letter-spacing:0.1em;text-transform:uppercase;color:var(--gold-dim);margin-bottom:4px">${label}</div>${sub}</div>`;
+}
+return`<div class="stat-row"><span class="stat-key">${label}</span><span class="stat-val">${formatValue(v)}</span></div>`;
+}).join('');
+}
+
+function renderList(arr,id){
+const el=document.getElementById(id);
+if(!arr||!arr.length){el.innerHTML='<div style="font-size:12px;color:var(--text-muted);font-style:italic">None recorded.</div>';return;}
+el.innerHTML=arr.map(item=>{
+if(typeof item==='object'&&item!==null){
+const name=item.name||item.faction||item.state||'Unknown';
+const desc=item.status||item.relation||item.note||'';
+const details=Object.entries(item).filter(([k])=>!['name','faction','state','status','relation','note'].includes(k)).map(([k,v])=>{
+const sl=k.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase());
+return`<span style="font-size:11px;color:var(--text-muted);margin-left:6px">${sl}: ${formatValue(v)}</span>`;
+}).join('');
+return`<div style="padding:4px 0;border-bottom:0.5px solid var(--border)"><span style="color:var(--text-dim);font-size:13px">${name}</span>${desc?`<span style="font-size:11px;color:var(--text-muted);font-style:italic;margin-left:6px">${desc}</span>`:''}${details?`<div>${details}</div>`:''}</div>`;
+}
+return`<div style="padding:3px 0;border-bottom:0.5px solid var(--border);font-size:12px;color:var(--text-dim)">&bull; ${formatValue(item)}</div>`;
+}).join('');
+}
+
+renderObj(realm.population,'realm-pop-body');
+renderObj(realm.economy,'realm-econ-body');
+renderObj(realm.military,'realm-mil-body');
+renderList(realm.geopolitics,'realm-geo-body');
+renderList(realm.relationships,'realm-rel-body');
+
+const overview=[];
+if(realm.type)overview.push(['Type',realm.type]);
+if(realm.food!==undefined)overview.push(['Food Supply',`${realm.food}/100`]);
+if(realm.happiness!==undefined)overview.push(['Happiness',`${realm.happiness}/100`]);
+document.getElementById('realm-overview-body').innerHTML=overview.length?overview.map(([k,v])=>`<div class="stat-row"><span class="stat-key">${k}</span><span class="stat-val">${v}</span></div>`).join(''):'<div style="font-size:12px;color:var(--text-muted);font-style:italic">No overview data.</div>';
 }
 
 // RENDER LOCATIONS
@@ -699,6 +787,22 @@ let activeGenre=genre;
 if(genre==='custom'){const ct=document.getElementById('custom-input').value.trim();if(!ct){errEl.style.display='block';errEl.textContent='Please describe your custom world.';return;}activeGenre=ct;}
 errEl.style.display='none';
 const btn=document.getElementById('begin-btn');btn.disabled=true;btn.style.display='none';
+
+// OFFLINE: start free-write directly
+if(!navigator.onLine){
+freeWriteCb.checked=true;
+document.getElementById('intro').style.display='none';document.getElementById('game').style.display='block';
+document.getElementById('save-btn').style.display='inline-block';
+turn=1;genreLabel=genre==='custom'?'Custom World':activeGenre;
+document.getElementById('turn-label').textContent=`Turn ${turn}`;
+initTabs();
+document.getElementById('narrative').innerHTML='<em style="color:var(--text-muted)">You begin your tale... write what happens next.</em>';
+setAIButtons(['Continue the story...','Look around','Check inventory','Rest']);
+freeWriteCb.dispatchEvent(new Event('change'));
+try{saveGame();}catch(e){}
+return;
+}
+
 const loadingEl=document.getElementById('intro-loading');loadingEl.style.display='flex';
 const msgs=['The gates stir...','Ancient magic awakens...','Worlds take shape...','Characters emerge...','The story breathes...'];
 let mi=0;const gte=document.getElementById('gate-text');
@@ -723,38 +827,6 @@ initTabs();renderScene(parsed);
 document.getElementById('a5').focus();window.scrollTo({top:0,behavior:'smooth'});
 }catch(e){clearInterval(iv);loadingEl.style.display='none';btn.style.display='';btn.disabled=false;errEl.style.display='block';errEl.textContent='Failed to start: '+e.message;}
 });
-
-// SUBMIT
-async function submitActions(){
-const actions=getSelectedActions();
-if(!actions.length){const e=document.getElementById('err-game');e.style.display='block';e.textContent='Select at least one action or write your own in field 5.';setTimeout(()=>e.style.display='none',3000);return;}
-document.getElementById('err-game').style.display='none';document.getElementById('loading').style.display='block';
-document.getElementById('submit-btn').disabled=true;document.getElementById('narrative').style.opacity='0.5';
-setAIButtonsLoading();
-const sc=inventory.length?`\n[Inventory: ${inventory.join(', ')}]`:'';
-const nc=Object.keys(npcRegistry).length?`\n[NPCs: ${Object.entries(npcRegistry).map(([n,d])=>`${n}(${d.relation},trust:${d.trust})`).join(', ')}]`:'';
-const rc=currentRealmState?`\n[Realm(${currentRealmState.name}): pop:${currentRealmState.population||'?'},econ:${currentRealmState.economy||'?'},mil:${currentRealmState.military||'?'},food:${currentRealmState.food||'?'},happy:${currentRealmState.happiness||'?'}]`:'';
-const fc=Object.keys(factions).length?`\n[Factions: ${Object.entries(factions).map(([n,v])=>`${n}:${v}`).join(', ')}]`:'';
-const lc=locationHistory.length?`\n[Visited: ${locationHistory.join(', ')}]`:'';
-const content=`My actions this turn:\n${actions.map((a,i)=>`${i+1}. ${a}`).join('\n')}\n[World Age: ${worldAge}] [Reputation: ${reputation}] [Personality: ${personality}]${sc}${nc}${rc}${fc}${lc}`;
-history.push({role:'user',content});
-try{
-const raw=await callStory(history,STORY_SYSTEM);const parsed=parse(raw);
-history.push({role:'assistant',content:raw});
-document.getElementById('a5').value='';[1,2,3,4].forEach(i=>document.getElementById(`btn-a${i}`).classList.remove('selected'));
-turn++;document.getElementById('turn-label').textContent=`Turn ${turn}`;
-renderScene(parsed);
-setTimeout(()=>{document.getElementById('game').scrollIntoView({behavior:'smooth',block:'start'});},80);
-document.getElementById('a5').focus();
-}catch(e){
-document.getElementById('err-game').style.display='block';document.getElementById('err-game').textContent='Error: '+e.message;
-history.pop();setAIButtons([]);
-}
-document.getElementById('narrative').style.opacity='1';document.getElementById('loading').style.display='none';
-document.getElementById('submit-btn').disabled=false;
-}
-document.getElementById('submit-btn').addEventListener('click',submitActions);
-document.getElementById('a5').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();submitActions();}});
 
 // END SCREEN
 function showEndScreen(parsed){
@@ -802,6 +874,82 @@ window.scrollTo({top:0,behavior:'smooth'});
 document.getElementById('save-btn').addEventListener('click',saveGame);
 document.getElementById('load-btn').addEventListener('click',loadGame);
 checkSavedGame();
+
+// OFFLINE DETECTION
+const offlineBar=document.getElementById('offline-bar');
+const freeWriteCb=document.getElementById('free-write-cb');
+function updateOnlineStatus(){
+const off=!navigator.onLine;
+offlineBar.classList.toggle('show',off);
+if(off)freeWriteCb.checked=true;
+}
+window.addEventListener('online',updateOnlineStatus);
+window.addEventListener('offline',updateOnlineStatus);
+updateOnlineStatus();
+freeWriteCb.addEventListener('change',()=>{
+const fw=freeWriteCb.checked;
+[1,2,3,4].forEach(i=>{
+const btn=document.getElementById(`btn-a${i}`);
+btn.disabled=fw;btn.style.opacity=fw?'0.3':'';
+btn.style.pointerEvents=fw?'none':'';
+});
+document.querySelector('.actions-note').style.display=fw?'none':'';
+});
+
+// FREE-WRITE MODE
+function isFreeWrite(){return document.getElementById('free-write-cb').checked;}
+
+async function submitActions(){
+const actions=getSelectedActions();
+if(!actions.length){const e=document.getElementById('err-game');e.style.display='block';e.textContent='Select at least one action or write your own in field 5.';setTimeout(()=>e.style.display='none',3000);return;}
+document.getElementById('err-game').style.display='none';
+
+// FREE-WRITE: user writes their own narrative, no API call
+if(isFreeWrite()){
+const customText=actions.join('\n');
+const divHtml=`<hr style="border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.3),transparent);margin:20px 0;display:block">`;
+document.getElementById('narrative').innerHTML=customText.replace(/\n/g,'<br>')+divHtml;
+document.getElementById('visual-strip').style.display='none';
+document.getElementById('scene-image-wrap').style.display='none';
+document.getElementById('a5').value='';[1,2,3,4].forEach(i=>document.getElementById(`btn-a${i}`).classList.remove('selected'));
+turn++;document.getElementById('turn-label').textContent=`Turn ${turn}`;
+setAIButtons(['Continue the story...','Look around','Check inventory','Rest']);
+try{saveGame();}catch(e){}
+setTimeout(()=>{document.getElementById('game').scrollIntoView({behavior:'smooth',block:'start'});},80);
+document.getElementById('a5').focus();
+return;
+}
+
+// ONLINE: normal AI flow
+if(!navigator.onLine){const e=document.getElementById('err-game');e.style.display='block';e.textContent='No internet connection. Enable free-write mode or try again later.';setTimeout(()=>e.style.display='none',4000);return;}
+
+document.getElementById('loading').style.display='block';
+document.getElementById('submit-btn').disabled=true;document.getElementById('narrative').style.opacity='0.5';
+setAIButtonsLoading();
+const sc=inventory.length?`\n[Inventory: ${inventory.join(', ')}]`:'';
+const nc=Object.keys(npcRegistry).length?`\n[NPCs: ${Object.entries(npcRegistry).map(([n,d])=>`${n}(${d.relation},trust:${d.trust})`).join(', ')}]`:'';
+const rc=currentRealmState?`\n[Realm(${currentRealmState.name}): pop:${currentRealmState.population?.total||'?'},econ:${currentRealmState.economy?.status||'?'},mil:${currentRealmState.military?.soldiers||'?'},food:${currentRealmState.food||'?'},happy:${currentRealmState.happiness||'?'}]`:'';
+const fc=Object.keys(factions).length?`\n[Factions: ${Object.entries(factions).map(([n,v])=>`${n}:${v}`).join(', ')}]`:'';
+const lc=locationHistory.length?`\n[Visited: ${locationHistory.join(', ')}]`:'';
+const content=`My actions this turn:\n${actions.map((a,i)=>`${i+1}. ${a}`).join('\n')}\n[World Age: ${worldAge}] [Reputation: ${reputation}] [Personality: ${personality}]${sc}${nc}${rc}${fc}${lc}`;
+history.push({role:'user',content});
+try{
+const raw=await callStory(history,STORY_SYSTEM);const parsed=parse(raw);
+history.push({role:'assistant',content:raw});
+document.getElementById('a5').value='';[1,2,3,4].forEach(i=>document.getElementById(`btn-a${i}`).classList.remove('selected'));
+turn++;document.getElementById('turn-label').textContent=`Turn ${turn}`;
+renderScene(parsed);
+setTimeout(()=>{document.getElementById('game').scrollIntoView({behavior:'smooth',block:'start'});},80);
+document.getElementById('a5').focus();
+}catch(e){
+document.getElementById('err-game').style.display='block';document.getElementById('err-game').textContent='Error: '+e.message;
+history.pop();setAIButtons([]);
+}
+document.getElementById('narrative').style.opacity='1';document.getElementById('loading').style.display='none';
+document.getElementById('submit-btn').disabled=false;
+}
+document.getElementById('submit-btn').addEventListener('click',submitActions);
+document.getElementById('a5').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();submitActions();}});
 if(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1'){if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js').then(()=>console.log('SW registered')).catch(()=>{});}
 </script>
 </body>
