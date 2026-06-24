@@ -410,6 +410,7 @@ IMPORTANT - Respond ONLY with valid JSON:
 }`;
 
 let apiKey='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';
+let openrouterKey='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';
 let genre='dark fantasy',genreLabel='dark fantasy',history=[],turn=0;
 let playerState={},inventory=[],npcRegistry={},currentRealmState=null;
 let factions={},titles=[],locationHistory=[],majorEvents=[],rumors=[];
@@ -473,15 +474,43 @@ document.getElementById(id).classList.toggle('open');
 }
 
 // API
-async function callStory(messages,systemPrompt){
+function trimHistory(msgs,maxPairs=10){
+if(msgs.length<=maxPairs*2+1)return msgs;
+const first=msgs[0];
+const recent=msgs.slice(-(maxPairs*2));
+return[first,...recent];
+}
+async function callGroq(messages,systemPrompt){
+const trimmed=trimHistory(messages);
 const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
 method:'POST',
 headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`},
-body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:1600,temperature:0.88,messages:[{role:'system',content:systemPrompt},...messages]})
+body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:1600,temperature:0.88,messages:[{role:'system',content:systemPrompt},...trimmed]})
 });
 if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${res.status}`);}
 const data=await res.json();const content=data.choices?.[0]?.message?.content;
 if(!content)throw new Error('Empty response');return content;
+}
+async function callOpenRouter(messages,systemPrompt){
+const trimmed=trimHistory(messages,20);
+const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+method:'POST',
+headers:{'Content-Type':'application/json','Authorization':`Bearer ${openrouterKey}`,'HTTP-Referer':'https://loreforge.app','X-Title':'Loreforge'},
+body:JSON.stringify({model:'nvidia/nemotron-3-ultra-550b-a55b',max_tokens:1600,temperature:0.88,messages:[{role:'system',content:systemPrompt},...trimmed]})
+});
+if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${res.status}`);}
+const data=await res.json();const content=data.choices?.[0]?.message?.content;
+if(!content)throw new Error('Empty response');return content;
+}
+async function callStory(messages,systemPrompt){
+try{return await callGroq(messages,systemPrompt);}
+catch(e){
+if(e.message.includes('limit')||e.message.includes('tokens')||e.message.includes('capacity')||e.message.includes('429')||e.message.includes('503')){
+console.warn('Groq limit hit, falling back to OpenRouter Nemotron Ultra 3');
+return await callOpenRouter(messages,systemPrompt);
+}
+throw e;
+}
 }
 function parse(raw){return JSON.parse(raw.replace(/```json|```/g,'').trim());}
 
