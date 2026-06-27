@@ -20,7 +20,7 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
   // API calls - network only, no cache
-  if (url.hostname === 'api.groq.com' || url.hostname === 'openrouter.ai') return;
+  if (url.hostname === 'generativelanguage.googleapis.com' || url.hostname === 'openrouter.ai') return;
 
   // Image generation - cache after first fetch
   if (url.hostname === 'image.pollinations.ai') {

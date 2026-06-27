@@ -365,52 +365,19 @@ h1{font-family:var(--font-display);font-size:clamp(24px,6vw,36px);font-weight:no
 <button class="begin-btn" onclick="location.reload()">Begin Anew</button>
 </div>
 </div>
+<script src="config.js"></script>
 <script>
-const STORY_SYSTEM=`You are an Interactive Story Game Engine AI. Create a fully immersive, turn-based world.
+const STORY_SYSTEM=`You are a turn-based story engine. Each turn the player gives actions. Narrate 5-8 cinematic sentences. Track NPCs, factions, inventory. Never control the player. Suggest 4 next actions. Use --- to separate description from dialogue.
 
-Rules:
-1. Each turn the player gives up to 5 actions (5th is their free custom action).
-2. Narrate outcomes, consequences, NPC reactions, environmental changes, emotional responses. Write 5-8 rich cinematic sentences.
-3. Keep narration cinematic, immersive, consistent with the genre.
-4. Generate a short vivid visual_prompt for image generation representing ONLY this specific scene.
-5. The world is ALIVE: introduce NPCs organically, have them react, remember history, let them grow or die. Always track at least 1-3 active characters.
-6. Never control the player character. Only describe world responses.
-7. After the narrative, always suggest exactly 4 possible next actions.
-8. If the player governs/resides in a settlement, populate 'realm_state' with detailed nested objects: population (with total, workers, farmers, merchants, craftsfolk, idle, etc.), economy (with agriculture, trade, mining, industry, treasury, taxation, status like "Weak|Moderate|Strong|Booming" for each — industry covers crafts, blacksmithing, weaving, woodworking, alchemy, and any manufactured goods), military (with soldiers, cavalry, archers, siege, navy, fortifications, training, morale), geopolitics (array of objects with name, status, tension like {"name":"Northern Kingdom","status":"Ally","tension":"Low"}), and relationships (array of objects with name, relation, standing, notes like {"name":"Merchant Guild","relation":"Friendly","standing":"Trusted","notes":"Supply food stores"}). Also include food and happiness as 0-100 numbers.
-9. Keep 'npcs' array as the DEFINITIVE current list. Each NPC must have: name, relation (ally|neutral|hostile|dead|unknown), note, trust (0-100 integer), memory (array of 1-3 short strings remembering key interactions with the player).
-10. Ensure 'narrative' separates descriptions from dialogue using a single --- line.
-11. Keep all state objects simple human-readable strings except trust (number) and memory (string array).
-12. Populate 'factions' object with faction names as keys and reputation scores (-100 to 100) as values. At least 2-3 factions if setting allows.
-13. Populate 'titles' array with any titles the player has earned based on their actions (e.g. "The Wanderer", "Dragon Slayer", "Bandit King"). Update as actions change.
-14. Populate 'location_discovered' with the name of any NEW location the player visits this turn (or null if staying).
-15. Populate 'major_events' array with 0-2 significant story events this turn (e.g. "Burned Oakwood Village", "Saved Sir Aldric"). Only truly memorable moments.
-16. Populate 'rumors' array with 0-2 short strings of what NPCs are saying about the player (e.g. "They say a stranger single-handedly defeated the wolf pack").
-17. Populate 'world_age' with the current in-world year (start at "Year 1", advance 1 year every ~25 turns or when major time skips happen).
-18. Populate 'personality' with the player's emerging alignment based on their cumulative actions (e.g. "Compassionate", "Ruthless", "Opportunistic", "Honorable", "Deceptive", "Neutral").
-19. Populate 'reputation' with a single word: "Unknown", "Noticed", "Known", "Famous", or "Legendary" (or "Feared" if negative).
-20. If player HP reaches 0 or the story ends, set "game_over": true and "end_summary" with a short epitaph.
+If the player governs a settlement, update realm_state from the previous state sent in the user message. Change ONLY what the player's actions directly affect. Keep all other values exactly the same. Population, economy, military numbers should be consistent turn to turn unless something specific changes them.
 
-IMPORTANT - Respond ONLY with valid JSON:
-{
-  "narrative":"<5-8 sentences with --- separating description from dialogue>",
-  "player_state":{"hp":"<e.g. 18/20>","status":"<e.g. Healthy>","location":"<current location>","gold":"<amount or N/A>","xp":"<amount or N/A>","reputation":"<Unknown|Noticed|Known|Famous|Legendary|Feared>","personality":"<e.g. Compassionate>"},
-  "inventory_changes":{"added":["<item>"],"removed":["<item>"],"equipped":["<item>"]},
-  "world_state":{"time":"<Dusk>","weather":"<Stormy>","environment":"<brief note>","faction_tension":"<brief note or omit>","world_age":"<Year 1>"},
-  "factions":{"<Faction Name>":<reputation -100 to 100>},
-  "npcs":[{"name":"<name>","relation":"ally|neutral|hostile|dead|unknown","note":"<status>","trust":<0-100>,"memory":["<event 1>","<event 2>"]}],
-  "realm_state":{"name":"<name>","type":"<Outpost|Kingdom|etc>","population":{"total":<number>,"workers":<number>,"farmers":<number>,"merchants":<number>,"craftsfolk":<number>,"idle":<number>,"notes":"<brief>"},"economy":{"agriculture":"<Weak|Moderate|Strong>: <brief>","trade":"<Weak|Moderate|Strong>: <brief>","mining":"<Weak|Moderate|Strong>: <brief>","industry":"<Weak|Moderate|Strong>: <brief — crafts, smithing, weaving, alchemy, manufactured goods>","treasury":"<amount>","taxation":"<Low|Moderate|High>","status":"<overall status>"},"military":{"soldiers":<number>,"cavalry":<number>,"archers":<number>,"siege":<number>,"navy":<number>,"fortifications":"<None|Basic|Strong|Impenetrable>","training":"<Raw|Moderate|Veteran|Elite>","morale":"<Low|Steady|High|Fanatical>"},"food":<0-100>,"happiness":<0-100>,"geopolitics":[{"name":"<faction/neighbor>","status":"<Ally|Neutral|Rival|Enemy>","tension":"<Low|Moderate|High|Critical>","notes":"<brief>"}],"relationships":[{"name":"<faction/leader/group>","relation":"<Friendly|Hostile|Neutral|Wary>","standing":"<Trusted|Known|Unknown|Distrusted>","notes":"<brief>"}]}
-  "titles":["<earned title>"],
-  "location_discovered":"<new location name or null>",
-  "major_events":["<event>"],
-  "rumors":["<rumor>"],
-  "visual_prompt":"<unique scene prompt, art style: dark oil painting, cinematic>",
-  "suggested_actions":["<action 1>","<action 2>","<action 3>","<action 4>"],
-  "game_over":false,
-  "end_summary":"<epitaph if game_over true, else omit>"
-}`;
+If the player governs a settlement, populate realm_state with nested objects: population (total,workers,farmers,merchants,craftsfolk,idle,notes), economy (agriculture,trade,mining,industry each with status and brief note, treasury, taxation, overall status), military (soldiers,cavalry,archers,siege,navy,fortifications,training,morale), geopolitics array [{name,status,tension,notes}], relationships array [{name,relation,standing,notes}]. Include food and happiness 0-100.
 
-let apiKey='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';
-let openrouterKey='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';
+Respond ONLY with valid JSON (no markdown):
+{"narrative":"<5-8 sentences, --- separates description from dialogue>","player_state":{"hp":"","status":"","location":"","gold":"","xp":"","reputation":"","personality":""},"inventory_changes":{"added":[],"removed":[],"equipped":[]},"world_state":{"time":"","weather":"","environment":"","world_age":""},"factions":{"name":score},"npcs":[{"name":"","relation":"ally|neutral|hostile|dead|unknown","note":"","trust":50,"memory":[]}],"realm_state":{"name":"","type":"","population":{"total":0,"workers":0,"farmers":0,"merchants":0,"craftsfolk":0,"idle":0,"notes":""},"economy":{"agriculture":"","trade":"","mining":"","industry":"","treasury":"","taxation":"","status":""},"military":{"soldiers":0,"cavalry":0,"archers":0,"siege":0,"navy":0,"fortifications":"","training":"","morale":""},"food":0,"happiness":0,"geopolitics":[],"relationships":[]},"titles":[],"location_discovered":"","major_events":[],"rumors":[],"visual_prompt":"<unique scene, dark oil painting style>","suggested_actions":["a1","a2","a3","a4"],"game_over":false,"end_summary":""}`;
+
+let apiKey=GEMINI_KEY;
+let openrouterKey=OPENROUTER_KEY;
 let genre='dark fantasy',genreLabel='dark fantasy',history=[],turn=0;
 let playerState={},inventory=[],npcRegistry={},currentRealmState=null;
 let factions={},titles=[],locationHistory=[],majorEvents=[],rumors=[];
@@ -480,15 +447,24 @@ const first=msgs[0];
 const recent=msgs.slice(-(maxPairs*2));
 return[first,...recent];
 }
-async function callGroq(messages,systemPrompt){
-const trimmed=trimHistory(messages);
-const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+async function callGemini(messages,systemPrompt){
+const trimmed=trimHistory(messages,2);
+const contents=[];
+trimmed.forEach(m=>{
+if(m.role==='system')return;
+contents.push({role:m.role==='assistant'?'model':'user',parts:[{text:m.content.substring(0,2000)}]});
+});
+const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,{
 method:'POST',
-headers:{'Content-Type':'application/json','Authorization':`Bearer ${apiKey}`},
-body:JSON.stringify({model:'llama-3.3-70b-versatile',max_tokens:1600,temperature:0.88,messages:[{role:'system',content:systemPrompt},...trimmed]})
+headers:{'Content-Type':'application/json'},
+body:JSON.stringify({
+contents,
+systemInstruction:{parts:[{text:systemPrompt}]},
+generationConfig:{temperature:0.88,maxOutputTokens:4096,responseMimeType:'application/json'}
+})
 });
 if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${res.status}`);}
-const data=await res.json();const content=data.choices?.[0]?.message?.content;
+const data=await res.json();const content=data.candidates?.[0]?.content?.parts?.[0]?.text;
 if(!content)throw new Error('Empty response');return content;
 }
 async function callOpenRouter(messages,systemPrompt){
@@ -496,23 +472,47 @@ const trimmed=trimHistory(messages,20);
 const res=await fetch('https://openrouter.ai/api/v1/chat/completions',{
 method:'POST',
 headers:{'Content-Type':'application/json','Authorization':`Bearer ${openrouterKey}`,'HTTP-Referer':'https://loreforge.app','X-Title':'Loreforge'},
-body:JSON.stringify({model:'nvidia/nemotron-3-ultra-550b-a55b',max_tokens:1600,temperature:0.88,messages:[{role:'system',content:systemPrompt},...trimmed]})
+body:JSON.stringify({model:'nvidia/nemotron-3-ultra-550b-a55b:free',max_tokens:4096,temperature:0.88,messages:[{role:'system',content:systemPrompt},...trimmed]})
 });
 if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`HTTP ${res.status}`);}
-const data=await res.json();const content=data.choices?.[0]?.message?.content;
+const data=await res.json();const content=data.choices?.[0]?.message?.content||data.choices?.[0]?.message?.reasoning_content;
 if(!content)throw new Error('Empty response');return content;
 }
 async function callStory(messages,systemPrompt){
-try{return await callGroq(messages,systemPrompt);}
+try{return await callGemini(messages,systemPrompt);}
 catch(e){
-if(e.message.includes('limit')||e.message.includes('tokens')||e.message.includes('capacity')||e.message.includes('429')||e.message.includes('503')){
-console.warn('Groq limit hit, falling back to OpenRouter Nemotron Ultra 3');
-return await callOpenRouter(messages,systemPrompt);
-}
-throw e;
+console.warn('Gemini failed:',e.message,'— falling back to OpenRouter');
+try{return await callOpenRouter(messages,systemPrompt);}
+catch(e2){throw new Error('Both providers failed: '+e.message+' / '+e2.message);}
 }
 }
-function parse(raw){return JSON.parse(raw.replace(/```json|```/g,'').trim());}
+function parse(raw){
+let s=raw.replace(/```json|```/g,'').trim();
+try{return JSON.parse(s);}
+catch(e){
+const lastClose=s.lastIndexOf('}');
+if(lastClose>0)s=s.substring(0,lastClose+1);
+try{return JSON.parse(s);}
+catch(e2){
+const partial={};
+const fields=['narrative','player_state','world_state','factions','npcs','realm_state','titles','location_discovered','major_events','rumors','visual_prompt','suggested_actions','game_over','end_summary','inventory_changes'];
+for(const f of fields){
+const re=new RegExp(`"${f}"\\s*:\\s*`);
+const m=s.match(re);
+if(m){
+const start=m.index+m[0].length;
+let depth=0,end=start;
+for(let i=start;i<s.length;i++){if(s[i]==='{'||s[i]==='[')depth++;if(s[i]==='}'||s[i]===']')depth--;if(depth<=0){end=i+1;break;}}
+if(end>start){
+try{partial[f]=JSON.parse(s.substring(start,end));}catch(err){}
+}
+}
+}
+if(Object.keys(partial).length>0)return partial;
+throw e2;
+}
+}
+}
 
 // ACTION BUTTONS UI
 function setAIButtons(actions){
@@ -783,7 +783,8 @@ c.innerHTML=r.map(rumor=>`<div class="rumor-box"><div class="rumor-label">Rumor<
 // RENDER SCENE
 function renderScene(parsed){
 const divHtml=`<hr style="border:0;height:1px;background:linear-gradient(90deg,transparent,rgba(201,168,76,0.3),transparent);margin:20px 0;display:block">`;
-document.getElementById('narrative').innerHTML=(parsed.narrative||'').replace(/---/g,divHtml).replace(/\n/g,'<br>');
+const narr=parsed.narrative||'The world stirs but no words come...';
+document.getElementById('narrative').innerHTML=narr.replace(/---/g,divHtml).replace(/\n/g,'<br>');
 if(parsed.player_state)renderPlayerPanel(parsed.player_state);
 if(parsed.world_state)renderWorldPanel(parsed.world_state);
 if(parsed.factions)renderFactions(parsed.factions);
@@ -836,14 +837,7 @@ const loadingEl=document.getElementById('intro-loading');loadingEl.style.display
 const msgs=['The gates stir...','Ancient magic awakens...','Worlds take shape...','Characters emerge...','The story breathes...'];
 let mi=0;const gte=document.getElementById('gate-text');
 const iv=setInterval(()=>{mi=(mi+1)%msgs.length;gte.textContent=msgs[mi];},1800);
-const initMsg=`Ready to begin. Genre/World: ${activeGenre}.
-Set an exciting opening scene. Establish who I am, where I am, and one immediate dramatic situation.
-If the setting implies a camp, settlement, noble house, fortress, nation, or kingdom I govern/reside in, define a starting realm_state with population, economy, military, food, happiness.
-Introduce 1-2 NPCs with trust and memory.
-Give me a starting inventory of 2-3 items.
-Provide 2-3 starting factions with reputation scores.
-Give me 1 starting title appropriate to the setting.
-Provide 4 suggested first actions. visual_prompt must be UNIQUE to this opening scene.`;
+const initMsg=`Begin a ${activeGenre} story. Set the scene, introduce my character, give 2-3 items, 1-2 NPCs, 2-3 factions, 1 title, and 4 actions. Include realm_state if I govern a place.`;
 history=[{role:'user',content:initMsg}];
 try{
 const raw=await callStory(history,STORY_SYSTEM);const parsed=parse(raw);
@@ -956,11 +950,11 @@ document.getElementById('loading').style.display='block';
 document.getElementById('submit-btn').disabled=true;document.getElementById('narrative').style.opacity='0.5';
 setAIButtonsLoading();
 const sc=inventory.length?`\n[Inventory: ${inventory.join(', ')}]`:'';
-const nc=Object.keys(npcRegistry).length?`\n[NPCs: ${Object.entries(npcRegistry).map(([n,d])=>`${n}(${d.relation},trust:${d.trust})`).join(', ')}]`:'';
-const rc=currentRealmState?`\n[Realm(${currentRealmState.name}): pop:${currentRealmState.population?.total||'?'},econ:${currentRealmState.economy?.status||'?'},mil:${currentRealmState.military?.soldiers||'?'},food:${currentRealmState.food||'?'},happy:${currentRealmState.happiness||'?'}]`:'';
+const nc=Object.keys(npcRegistry).length?`\n[NPCs: ${JSON.stringify(Object.entries(npcRegistry).map(([n,d])=>({name:n,...d)}))}]`:'';
+const rc=currentRealmState?`\n[Realm: ${JSON.stringify(currentRealmState)}]`:'';
 const fc=Object.keys(factions).length?`\n[Factions: ${Object.entries(factions).map(([n,v])=>`${n}:${v}`).join(', ')}]`:'';
 const lc=locationHistory.length?`\n[Visited: ${locationHistory.join(', ')}]`:'';
-const content=`My actions this turn:\n${actions.map((a,i)=>`${i+1}. ${a}`).join('\n')}\n[World Age: ${worldAge}] [Reputation: ${reputation}] [Personality: ${personality}]${sc}${nc}${rc}${fc}${lc}`;
+const content=`My actions this turn:\n${actions.map((a,i)=>`${i+1}. ${a}`).join('\n')}\n[World Age: ${worldAge}] [Reputation: ${reputation}] [Personality: ${personality}]${sc}${nc}${rc}${fc}${lc}\nIMPORTANT: Update the realm_state from above. Change only what the player's actions affect. Keep all other values exactly the same.`;
 history.push({role:'user',content});
 try{
 const raw=await callStory(history,STORY_SYSTEM);const parsed=parse(raw);
