@@ -950,7 +950,7 @@ document.getElementById('loading').style.display='block';
 document.getElementById('submit-btn').disabled=true;document.getElementById('narrative').style.opacity='0.5';
 setAIButtonsLoading();
 const sc=inventory.length?`\n[Inventory: ${inventory.join(', ')}]`:'';
-const nc=Object.keys(npcRegistry).length?`\n[NPCs: ${JSON.stringify(Object.entries(npcRegistry).map(([n,d])=>({name:n,...d)}))}]`:'';
+const nc=Object.keys(npcRegistry).length?'\n[NPCs: '+JSON.stringify(Object.entries(npcRegistry).map(function(e){return Object.assign({name:e[0]},e[1])}))+']':'';
 const rc=currentRealmState?`\n[Realm: ${JSON.stringify(currentRealmState)}]`:'';
 const fc=Object.keys(factions).length?`\n[Factions: ${Object.entries(factions).map(([n,v])=>`${n}:${v}`).join(', ')}]`:'';
 const lc=locationHistory.length?`\n[Visited: ${locationHistory.join(', ')}]`:'';
